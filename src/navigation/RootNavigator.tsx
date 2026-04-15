@@ -1,0 +1,153 @@
+import { useEffect } from 'react';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as SplashScreen from 'expo-splash-screen';
+import { useAuth } from '../context/AuthContext';
+import { getTabLabels, resolveSegment } from '../roles/segmentConfig';
+import { colors, typography } from '../theme';
+import type { AuthStackParamList, MainTabParamList } from './types';
+import { HomeStackNavigator } from './HomeStackNavigator';
+
+import { LoginScreen } from '../screens/LoginScreen';
+import { RegisterScreen } from '../screens/RegisterScreen';
+import { ProfileScreen } from '../screens/ProfileScreen';
+import { MyCoursesPlaceholderScreen } from '../screens/MyCoursesPlaceholderScreen';
+import { SchedulePlaceholderScreen } from '../screens/SchedulePlaceholderScreen';
+import { GradesPlaceholderScreen } from '../screens/GradesPlaceholderScreen';
+const AuthStack = createNativeStackNavigator<AuthStackParamList>();
+const Tab = createBottomTabNavigator<MainTabParamList>();
+
+const tabIconStyles = StyleSheet.create({
+  wrap: { alignItems: 'center', justifyContent: 'flex-start' },
+  indicator: {
+    width: 28,
+    height: 3,
+    borderRadius: 2,
+    marginBottom: 4,
+    backgroundColor: 'transparent',
+  },
+  indicatorOn: {
+    backgroundColor: colors.accent,
+  },
+});
+
+const navTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: colors.surface,
+    primary: colors.primary,
+  },
+};
+
+function AuthNavigator() {
+  return (
+    <AuthStack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.card },
+      }}
+    >
+      <AuthStack.Screen name="Login" component={LoginScreen} />
+      <AuthStack.Screen
+        name="Register"
+        component={RegisterScreen}
+        options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
+          title: 'Registro',
+        }}
+      />
+    </AuthStack.Navigator>
+  );
+}
+
+function MainTabs() {
+  const { user, isGuest } = useAuth();
+  const tabLabels = getTabLabels(resolveSegment(isGuest, user?.rol));
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: route.name !== 'ProfileTab' && route.name !== 'HomeTab',
+        headerStyle: { backgroundColor: colors.primary },
+        headerTintColor: colors.onPrimary,
+        headerTitleStyle: { fontWeight: typography.weight.semibold },
+        tabBarActiveTintColor: colors.heroNavy,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopColor: colors.border,
+          paddingTop: 6,
+          height: 62,
+        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarIcon: ({ color, size, focused }) => {
+          const r = route.name;
+          let name = 'home-outline' as keyof typeof Ionicons.glyphMap;
+          if (r === 'HomeTab') name = focused ? 'home' : 'home-outline';
+          else if (r === 'MyCoursesTab') name = focused ? 'book' : 'book-outline';
+          else if (r === 'ScheduleTab') name = focused ? 'calendar' : 'calendar-outline';
+          else if (r === 'GradesTab') name = focused ? 'ribbon' : 'ribbon-outline';
+          else name = focused ? 'person' : 'person-outline';
+          return (
+            <View style={tabIconStyles.wrap}>
+              <View style={[tabIconStyles.indicator, focused && tabIconStyles.indicatorOn]} />
+              <Ionicons name={name} size={size} color={color} />
+            </View>
+          );
+        },
+      })}
+    >
+      <Tab.Screen
+        name="HomeTab"
+        component={HomeStackNavigator}
+        options={{ title: 'Inicio', headerShown: false }}
+      />
+      <Tab.Screen
+        name="MyCoursesTab"
+        component={MyCoursesPlaceholderScreen}
+        options={{ title: tabLabels.myCourses, tabBarLabel: tabLabels.myCourses }}
+      />
+      <Tab.Screen
+        name="ScheduleTab"
+        component={SchedulePlaceholderScreen}
+        options={{ title: tabLabels.schedule, tabBarLabel: tabLabels.schedule }}
+      />
+      <Tab.Screen
+        name="GradesTab"
+        component={GradesPlaceholderScreen}
+        options={{ title: tabLabels.grades, tabBarLabel: tabLabels.grades }}
+      />
+      <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Perfil' }} />
+    </Tab.Navigator>
+  );
+}
+
+export function RootNavigator() {
+  const { user, isGuest, ready } = useAuth();
+
+  useEffect(() => {
+    if (ready) {
+      SplashScreen.hideAsync();
+    }
+  }, [ready]);
+
+  if (!ready) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surface }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  const inApp = user != null || isGuest;
+
+  return (
+    <NavigationContainer theme={navTheme}>{inApp ? <MainTabs /> : <AuthNavigator />}</NavigationContainer>
+  );
+}
