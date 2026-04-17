@@ -5,7 +5,7 @@ export const colors = {
   /** Azul institucional (paleta) */
   primary: '#041147',
   /** Azul hero / cabeceras como en mockups (#001A4D) */
-  heroNavy: '#001A4D',
+  heroNavy: '#041147',
   primaryMuted: '#0d1f5c',
   /** Botón filtros / acentos azules en UI */
   interactiveBlue: '#2F80ED',

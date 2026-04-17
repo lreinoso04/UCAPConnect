@@ -41,7 +41,10 @@ export function DashboardScreen({ navigation }: Props) {
     }
     if (nav === 'myCourses') goTab('MyCoursesTab');
     if (nav === 'schedule') goTab('ScheduleTab');
-    if (nav === 'grades') goTab('GradesTab');
+    if (nav === 'grades') {
+      Alert.alert('Próximamente', 'Esta opción estará disponible en una próxima versión.');
+      return;
+    }
   }
 
   return (
@@ -59,7 +62,7 @@ export function DashboardScreen({ navigation }: Props) {
           </View>
           <Pressable
             style={styles.bell}
-            onPress={() => Alert.alert('Notificaciones', 'Tienes 3 notificaciones nuevas (demostración).')}
+            onPress={() => navigation.navigate('Notifications')}
           >
             <Ionicons name="notifications-outline" size={22} color={colors.textOnDark} />
             <View style={styles.badge}>

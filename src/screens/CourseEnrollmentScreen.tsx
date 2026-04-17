@@ -39,6 +39,7 @@ export function CourseEnrollmentScreen({ route, navigation }: Props) {
   const [documentoId, setDocumentoId] = useState('');
   const [comentarios, setComentarios] = useState('');
   const [aceptaDatos, setAceptaDatos] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (!user?.token || user.rol !== 'ESTUDIANTE') return;
@@ -71,11 +72,12 @@ export function CourseEnrollmentScreen({ route, navigation }: Props) {
       Alert.alert('Confirmación requerida', 'Marca la casilla para confirmar que la información es correcta.');
       return;
     }
-    Alert.alert(
-      'Envío no disponible aún',
-      'El proceso de inscripción en línea se habilitará próximamente. Tu solicitud no se ha enviado. Gracias por tu interés.',
-      [{ text: 'Entendido', style: 'default' }]
-    );
+    
+    setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+      navigation.goBack();
+    }, 2500);
   }
 
   return (
@@ -221,6 +223,17 @@ export function CourseEnrollmentScreen({ route, navigation }: Props) {
           </Text>
         </View>
       </ScrollView>
+
+      {showSuccess && (
+        <View style={StyleSheet.absoluteFill}>
+          <View style={styles.overlayBg}>
+            <View style={styles.lottieCard}>
+              <Ionicons name="checkmark-circle" size={80} color="#2e7d32" style={{ marginBottom: 16 }} />
+              <Text style={styles.lottieTxt}>¡Inscripción confirmada!</Text>
+            </View>
+          </View>
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -354,4 +367,27 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     textAlign: 'center',
   },
+  overlayBg: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lottieCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.md,
+    padding: spacing.xl,
+    alignItems: 'center',
+    width: '80%',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+  },
+  lottieAnim: { width: 140, height: 140 },
+  lottieTxt: { 
+    fontSize: typography.size.md, 
+    fontWeight: typography.weight.bold, 
+    color: colors.heroNavy,
+    marginTop: spacing.md
+  }
 });

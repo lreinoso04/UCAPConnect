@@ -15,9 +15,19 @@ type AuthState = {
   logout: () => Promise<void>;
   enterAsGuest: () => Promise<void>;
   exitGuestToLogin: () => Promise<void>;
+  restoreSession: (data: StoredAuth) => Promise<void>;
+  updateUserImage: (localUri: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
+
+// Helper para evitar que las Promesas de SecureStore o AsyncStorage se cuelguen infinitamente en Android
+const withTimeout = <T,>(promise: Promise<T>, ms: number = 3000): Promise<T | null> => {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<StoredAuth | null>(null);
@@ -27,20 +37,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const stored = await loadAuth();
-      const guest = await loadGuestSession();
-      if (!cancelled) {
-        if (stored) {
-          setUser(stored);
-          setIsGuest(false);
-        } else if (guest) {
-          setUser(null);
-          setIsGuest(true);
-        } else {
-          setUser(null);
-          setIsGuest(false);
+      try {
+        const stored = await withTimeout(loadAuth());
+        const guest = await withTimeout(loadGuestSession());
+        
+        if (!cancelled) {
+          if (stored) {
+            setUser(stored);
+            setIsGuest(false);
+          } else {
+            setUser(null);
+            setIsGuest(!!guest);
+          }
+          setReady(true);
         }
-        setReady(true);
+      } catch (error) {
+        if (!cancelled) {
+          setUser(null);
+          setIsGuest(false);
+          setReady(true);
+        }
       }
     })();
     return () => {
@@ -78,8 +94,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
     await clearStoredSession();
-    await setGuestSession(false);
-    setIsGuest(false);
+    await setGuestSession(true);
+    setIsGuest(true);
     setUser(null);
   }, [user?.token]);
 
@@ -95,6 +111,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsGuest(false);
   }, []);
 
+  const restoreSession = useCallback(async (data: StoredAuth) => {
+    await saveAuth(data);
+    await setGuestSession(false);
+    setIsGuest(false);
+    setUser(data);
+  }, []);
+
+  const updateUserImage = useCallback(async (uri: string) => {
+    if (user) {
+      const nextUser = { ...user, img: uri };
+      await saveAuth(nextUser);
+      setUser(nextUser);
+    }
+  }, [user]);
+
   const value = useMemo(
     () => ({
       user,
@@ -105,8 +136,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logout,
       enterAsGuest,
       exitGuestToLogin,
+      restoreSession,
+      updateUserImage,
     }),
-    [user, isGuest, ready, login, register, logout, enterAsGuest, exitGuestToLogin]
+    [user, isGuest, ready, login, register, logout, enterAsGuest, exitGuestToLogin, restoreSession, updateUserImage]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

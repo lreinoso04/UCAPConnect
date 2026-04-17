@@ -42,6 +42,22 @@ export const continueCourses: ContinueCourse[] = [
     progressPct: 50,
     progressLabel: 'Progreso - Módulo 4 de 8 - Evaluación formativa',
   },
+  {
+    id: '3',
+    title: 'Taller - Ciberseguridad para Redes Empresariales',
+    schedule: 'Sábados de 9:00 a. m. a 12:00 p. m. · Virtual',
+    facilitator: 'Mtro. Luis Fernández',
+    progressPct: 20,
+    progressLabel: 'Progreso - Módulo 2 de 5 - Amenazas comunes',
+  },
+  {
+    id: '4',
+    title: 'Especialidad - Gestión y Dirección de Centros Educativos',
+    schedule: 'Miércoles y Viernes 6:00 - 9:00 p. m. · Híbrido',
+    facilitator: 'Dra. Josefina Marte',
+    progressPct: 90,
+    progressLabel: 'Progreso - Proyecto final',
+  },
 ];
 
 export type UpcomingEvent = {
@@ -65,6 +81,36 @@ export const upcomingEvents: UpcomingEvent[] = [
     title: 'Liderazgo Estratégico y Toma de Decisiones',
     facilitator: 'Facilitadora: Lic. Ana Peralta',
     locationLine: 'Virtual · Santo Domingo',
+  },
+  {
+    id: '2',
+    day: '21',
+    month: 'Mar',
+    timeRange: '9:00 am a 12:00 pm',
+    tag: 'Clase de taller',
+    title: 'Ciberseguridad Práctica',
+    facilitator: 'Mtro. Luis Fernández',
+    locationLine: 'Presencial · Recinto Santiago',
+  },
+  {
+    id: '3',
+    day: '23',
+    month: 'Mar',
+    timeRange: '6:00 pm a 8:00 pm',
+    tag: 'Tutoría grupal',
+    title: 'Revisión y avance de Proyecto Final',
+    facilitator: 'Dra. Josefina Marte',
+    locationLine: 'Virtual · Teams',
+  },
+  {
+    id: '4',
+    day: '25',
+    month: 'Mar',
+    timeRange: '10:00 am a 11:30 am',
+    tag: 'Webinar gratuito',
+    title: 'Novedades de la Gestión Educativa',
+    facilitator: 'Panel de Expertos',
+    locationLine: 'YouTube Live',
   },
 ];
 

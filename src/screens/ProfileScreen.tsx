@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getProfile, updateProfile } from '../api/student';
@@ -82,7 +83,7 @@ function Card({ children }: { children: ReactNode }) {
 
 export function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { user, isGuest, logout, exitGuestToLogin } = useAuth();
+  const { user, isGuest, logout, exitGuestToLogin, updateUserImage } = useAuth();
   const [form, setForm] = useState<EstudianteProfile>(emptyProfile);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -165,6 +166,30 @@ export function ProfileScreen() {
     Alert.alert(title, 'Esta opción estará disponible en una próxima versión.');
   }
 
+  async function onPickImage() {
+    if (!isStudent) return;
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert('Permiso denegado', 'Se necesita acceso a tus fotos para cambiar la imagen del perfil.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        await updateUserImage(result.assets[0].uri);
+        Alert.alert('Listo', 'Foto de perfil actualizada correctamente.');
+      }
+    } catch (e) {
+      console.error(e);
+      Alert.alert('Error', 'Hubo un problema al seleccionar la imagen.');
+    }
+  }
+
   function openPersonalDataEditor() {
     if (!isStudent) return;
     setSaveError(null);
@@ -222,7 +247,7 @@ export function ProfileScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={[styles.hero, { paddingTop: insets.top + spacing.lg }]}>
-        <View style={styles.avatarRing}>
+        <Pressable style={styles.avatarRing} onPress={() => void onPickImage()}>
           {user.img ? (
             <Image source={{ uri: user.img }} style={styles.avatarImg} contentFit="cover" />
           ) : (
@@ -230,7 +255,10 @@ export function ProfileScreen() {
               <Ionicons name="person" size={48} color="#9ca3af" />
             </View>
           )}
-        </View>
+          <View style={styles.editBadge}>
+            <Ionicons name="camera" size={16} color="#FFF" />
+          </View>
+        </Pressable>
         <Text style={styles.heroName}>{fullName}</Text>
         <Text style={styles.heroId}>{idLine}</Text>
 
@@ -524,6 +552,24 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
   },
+  editBadge: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.heroNavy,
+    borderWidth: 3,
+    borderColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
   heroName: {
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
@@ -701,12 +747,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: radius.pill,
     alignItems: 'center',
-    backgroundColor: '#ffebee',
+    backgroundColor: '#ffeaeb',
     borderWidth: 1,
-    borderColor: colors.error,
+    borderColor: '#ff4c4c',
   },
   logoutBtnText: {
-    color: colors.error,
+    color: '#ff3030',
     fontWeight: typography.weight.bold,
     fontSize: typography.size.body,
   },

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as SplashScreen from 'expo-splash-screen';
 import { useAuth } from '../context/AuthContext';
@@ -14,9 +14,9 @@ import { HomeStackNavigator } from './HomeStackNavigator';
 import { LoginScreen } from '../screens/LoginScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import { MyCoursesPlaceholderScreen } from '../screens/MyCoursesPlaceholderScreen';
-import { SchedulePlaceholderScreen } from '../screens/SchedulePlaceholderScreen';
-import { GradesPlaceholderScreen } from '../screens/GradesPlaceholderScreen';
+import { MyCoursesScreen } from '../screens/MyCoursesScreen';
+import { ScheduleScreen } from '../screens/ScheduleScreen';
+import { CartScreen } from '../screens/CartScreen';
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -67,13 +67,13 @@ function AuthNavigator() {
 }
 
 function MainTabs() {
-  const { user, isGuest } = useAuth();
+  const { user, isGuest, exitGuestToLogin } = useAuth();
   const tabLabels = getTabLabels(resolveSegment(isGuest, user?.rol));
 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: route.name !== 'ProfileTab' && route.name !== 'HomeTab',
+        headerShown: route.name === 'CartTab',
         headerStyle: { backgroundColor: colors.primary },
         headerTintColor: colors.onPrimary,
         headerTitleStyle: { fontWeight: typography.weight.semibold },
@@ -92,7 +92,7 @@ function MainTabs() {
           if (r === 'HomeTab') name = focused ? 'home' : 'home-outline';
           else if (r === 'MyCoursesTab') name = focused ? 'book' : 'book-outline';
           else if (r === 'ScheduleTab') name = focused ? 'calendar' : 'calendar-outline';
-          else if (r === 'GradesTab') name = focused ? 'ribbon' : 'ribbon-outline';
+          else if (r === 'CartTab') name = focused ? 'cart' : 'cart-outline';
           else name = focused ? 'person' : 'person-outline';
           return (
             <View style={tabIconStyles.wrap}>
@@ -110,18 +110,29 @@ function MainTabs() {
       />
       <Tab.Screen
         name="MyCoursesTab"
-        component={MyCoursesPlaceholderScreen}
+        component={MyCoursesScreen}
         options={{ title: tabLabels.myCourses, tabBarLabel: tabLabels.myCourses }}
       />
       <Tab.Screen
         name="ScheduleTab"
-        component={SchedulePlaceholderScreen}
+        component={ScheduleScreen}
         options={{ title: tabLabels.schedule, tabBarLabel: tabLabels.schedule }}
       />
       <Tab.Screen
-        name="GradesTab"
-        component={GradesPlaceholderScreen}
-        options={{ title: tabLabels.grades, tabBarLabel: tabLabels.grades }}
+        name="CartTab"
+        component={CartScreen}
+        options={{ title: 'Carrito', tabBarLabel: 'Carrito' }}
+        listeners={{
+          tabPress: (e) => {
+            if (isGuest) {
+              e.preventDefault();
+              Alert.alert('Registro requerido', 'Debes iniciar sesión para usar el carrito.', [
+                { text: 'Cancelar', style: 'cancel' },
+                { text: 'Registrarse / Entrar', onPress: () => exitGuestToLogin() }
+              ]);
+            }
+          }
+        }}
       />
       <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Perfil' }} />
     </Tab.Navigator>

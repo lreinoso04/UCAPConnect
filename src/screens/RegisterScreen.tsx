@@ -9,6 +9,7 @@ import {
   Text,
   TextInput,
   View,
+  Alert,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BirthDatePickerField } from '../components/BirthDatePickerField';
@@ -77,7 +78,9 @@ export function RegisterScreen({ navigation }: Props) {
         username: username.trim(),
         password,
       });
-      navigation.navigate('Login');
+      Alert.alert('Registro exitoso', 'Registro satisfactorio. Ahora puedes iniciar sesión.', [
+        { text: 'OK', onPress: () => navigation.navigate('Login') }
+      ]);
     } catch (e) {
       const msg =
         e instanceof ApiException

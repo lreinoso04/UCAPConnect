@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { ApiException } from '../api/client';
@@ -22,13 +23,13 @@ import type { AuthStackParamList } from '../navigation/types';
 import { colors, layout, radius, spacing, typography } from '../theme';
 
 const logoSource = require('../../assets/logo-ucap.png');
-const windowH = Dimensions.get('window').height;  // kept for minHeight fallback
+const windowH = Dimensions.get('window').height;
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export function LoginScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const { login, enterAsGuest } = useAuth();
+  const { login, enterAsGuest, restoreSession } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -59,15 +60,6 @@ export function LoginScreen({ navigation }: Props) {
     }
   }
 
-  async function onGuest() {
-    setError(null);
-    setLoading(true);
-    try {
-      await enterAsGuest();
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <KeyboardAvoidingView
@@ -80,10 +72,10 @@ export function LoginScreen({ navigation }: Props) {
         bounces={false}
       >
         {!keyboardVisible && (
-        <View style={[styles.hero, { paddingTop: insets.top + spacing.lg, minHeight: windowH * 0.4 }]}>
+        <View style={[styles.hero, { paddingTop: insets.top + spacing.lg, minHeight: windowH * 0.35 }]}>
           <Image source={logoSource} style={styles.logo} contentFit="contain" accessibilityLabel="UCAP" />
           <Text style={styles.heroTitle}>UCAP Connect</Text>
-          <Text style={styles.heroSubtitle}>Centro de Capacitación Profesional - UAPA</Text>
+          <Text style={styles.heroSubtitle}>Centro de Capacitación Profesional • UAPA</Text>
           <View style={styles.heroAccent} />
         </View>
         )}
@@ -95,7 +87,7 @@ export function LoginScreen({ navigation }: Props) {
           <Text style={styles.fieldLabel}>Usuario / Correo</Text>
           <TextInput
             style={styles.input}
-            placeholder="Tu usuario o correo institucional"
+            placeholder="Tu usuario o correo..."
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
@@ -151,16 +143,12 @@ export function LoginScreen({ navigation }: Props) {
           <View style={styles.registerRow}>
             <Text style={styles.registerQ}>¿No tienes cuenta? </Text>
             <Pressable onPress={() => navigation.navigate('Register')} disabled={loading}>
-              <Text style={styles.registerLink}>Registrate gratis</Text>
+              <Text style={styles.registerLink}>Regístrate gratis</Text>
             </Pressable>
           </View>
 
-          <Pressable
-            style={[styles.guestLink, loading && styles.btnDisabled]}
-            onPress={onGuest}
-            disabled={loading}
-          >
-            <Text style={styles.guestLinkText}>Explorar sin cuenta</Text>
+          <Pressable style={styles.guestLink} onPress={() => enterAsGuest()} disabled={loading}>
+            <Text style={styles.guestLinkText}>Registrar más tarde / Explorar catálogo</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -173,110 +161,107 @@ const styles = StyleSheet.create({
   scroll: { flexGrow: 1 },
   hero: {
     position: 'relative',
-    backgroundColor: colors.primary,
+    backgroundColor: '#041147',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: layout.screenPadding,
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing.xl,
   },
   logo: {
     width: 220,
     height: 88,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   heroTitle: {
     fontSize: typography.size.hero,
     fontWeight: typography.weight.bold,
-    color: colors.textOnDark,
-    letterSpacing: 0.3,
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   heroSubtitle: {
-    marginTop: spacing.sm,
-    fontSize: typography.size.sm,
-    color: 'rgba(255,255,255,0.92)',
+    marginTop: 4,
+    fontSize: typography.size.xs,
+    color: 'rgba(255,255,255,0.85)',
     textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: spacing.md,
   },
   heroAccent: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: 3,
-    backgroundColor: colors.accent,
+    height: 4,
+    backgroundColor: '#FF8300',
   },
   formBlock: {
     flex: 1,
     paddingHorizontal: layout.screenPadding,
-    paddingTop: spacing.xxl,
-    paddingBottom: spacing.xxxl + spacing.lg,
+    paddingTop: spacing.xl + spacing.md,
+    paddingBottom: spacing.xxxl,
     backgroundColor: colors.card,
   },
   welcome: {
-    fontSize: typography.size.xl,
+    fontSize: 24,
     fontWeight: typography.weight.bold,
     color: colors.text,
   },
   welcomeHint: {
-    marginTop: spacing.xs,
-    fontSize: typography.size.md,
+    marginTop: 4,
+    fontSize: typography.size.sm,
     color: colors.textMuted,
     marginBottom: spacing.xl,
   },
   fieldLabel: {
-    fontSize: typography.size.md,
+    fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     color: colors.text,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
   input: {
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.lg,
+    borderColor: 'transparent',
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.xl,
     paddingVertical: 14,
     fontSize: typography.size.body,
-    backgroundColor: colors.surface,
+    backgroundColor: '#F2F3F7',
     marginBottom: spacing.lg,
     color: colors.text,
   },
-  forgotWrap: { alignSelf: 'flex-end', marginTop: -spacing.sm, marginBottom: spacing.lg },
-  forgot: { fontSize: typography.size.sm, color: colors.interactiveBlue, fontWeight: typography.weight.medium },
-  error: { color: colors.error, marginBottom: spacing.md, fontSize: typography.size.sm },
+  forgotWrap: { alignSelf: 'flex-end', marginTop: -spacing.sm, marginBottom: spacing.xl },
+  forgot: { fontSize: typography.size.sm, color: '#007BFF', fontWeight: typography.weight.medium },
+  error: { color: colors.error, marginBottom: spacing.md, fontSize: typography.size.sm, textAlign: 'center' },
   primaryBtn: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#041147',
     borderRadius: radius.pill,
     paddingVertical: 16,
     alignItems: 'center',
     marginBottom: spacing.xl,
   },
   primaryBtnText: {
-    color: colors.onPrimary,
-    fontSize: typography.size.body,
+    color: '#ffffff',
+    fontSize: typography.size.md,
     fontWeight: typography.weight.bold,
   },
   btnDisabled: { opacity: 0.65 },
   registerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    flexWrap: 'wrap',
     alignItems: 'center',
-    marginBottom: spacing.lg,
   },
-  registerQ: { fontSize: typography.size.md, color: colors.textMuted },
+  registerQ: { fontSize: typography.size.sm, color: colors.text },
   registerLink: {
-    fontSize: typography.size.md,
+    fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
-    color: colors.interactiveBlue,
+    color: '#007BFF',
   },
   guestLink: {
-    alignSelf: 'center',
-    paddingVertical: spacing.sm,
+    marginTop: spacing.xl,
+    paddingVertical: 12,
+    alignItems: 'center',
   },
   guestLinkText: {
     fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
     color: colors.textMuted,
-    textDecorationLine: 'underline',
   },
 });
