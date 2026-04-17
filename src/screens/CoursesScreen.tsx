@@ -8,6 +8,7 @@ import {
   Text,
   TextInput,
   View,
+  ScrollView,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -58,7 +59,8 @@ function visiblePageNumbers(
 
 export function CoursesScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const { user, isGuest, exitGuestToLogin } = useAuth();
+  const { user } = useAuth();
+  const isGuest = !user;
   const { cartCount } = useCart();
   const [list, setList] = useState<CursoResponse[]>([]);
   const [page, setPage] = useState(1);
@@ -70,6 +72,9 @@ export function CoursesScreen({ navigation }: Props) {
   const [draftSearch, setDraftSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState<number | null>(null);
+  const [activeFilter, setActiveFilter] = useState('Todos');
+
+  const filterOptions = ['Todos', 'Diplomados', 'Seminarios', 'Cursos', 'Talleres'];
 
   const load = useCallback(
     async (pageNum: number, opts?: { initial?: boolean; searchOverride?: string }) => {
@@ -150,7 +155,7 @@ export function CoursesScreen({ navigation }: Props) {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
             {isGuest && (
               <Pressable 
-                onPress={() => exitGuestToLogin()}
+                onPress={() => navigation.navigate('Login' as any)}
                 style={{ backgroundColor: '#041147', paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.pill }}
               >
                 <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: 'bold' }}>Acceder</Text>
@@ -160,7 +165,7 @@ export function CoursesScreen({ navigation }: Props) {
               if (isGuest) {
                 Alert.alert('Registro requerido', 'Debes iniciar sesión para usar el carrito.', [
                   { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Entrar', onPress: () => exitGuestToLogin() }
+                  { text: 'Entrar', onPress: () => navigation.navigate('Login' as any) }
                 ]);
               } else {
                 navigation.navigate('Cart');
@@ -184,6 +189,22 @@ export function CoursesScreen({ navigation }: Props) {
           onSubmitEditing={submitSearch}
           returnKeyType="search"
         />
+
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterScroll}
+        >
+          {filterOptions.map(f => (
+            <Pressable 
+              key={f} 
+              style={[styles.filterPill, activeFilter === f && styles.filterPillActive]}
+              onPress={() => setActiveFilter(f)}
+            >
+              <Text style={[styles.filterPillText, activeFilter === f && styles.filterPillTextActive]}>{f}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
       </View>
 
       {loading && !refreshing && list.length === 0 ? (
@@ -339,6 +360,31 @@ const styles = StyleSheet.create({
     fontSize: typography.size.body,
     backgroundColor: colors.surface,
     color: colors.text,
+    marginBottom: spacing.sm,
+  },
+  filterScroll: {
+    paddingVertical: spacing.xs,
+    gap: spacing.sm,
+  },
+  filterPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  filterPillActive: {
+    backgroundColor: '#FF8300',
+    borderColor: '#FF8300',
+  },
+  filterPillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+  filterPillTextActive: {
+    color: '#FFF',
   },
   bannerError: {
     marginHorizontal: layout.screenPadding,

@@ -14,6 +14,8 @@ import { HomeStackNavigator } from './HomeStackNavigator';
 import { LoginScreen } from '../screens/LoginScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { CoursesScreen } from '../screens/CoursesScreen';
+import { CourseDetailScreen } from '../screens/CourseDetailScreen';
 import { MyCoursesScreen } from '../screens/MyCoursesScreen';
 import { ScheduleScreen } from '../screens/ScheduleScreen';
 import { CartScreen } from '../screens/CartScreen';
@@ -51,6 +53,8 @@ function AuthNavigator() {
         contentStyle: { backgroundColor: colors.card },
       }}
     >
+      <AuthStack.Screen name="CoursesList" component={CoursesScreen} />
+      <AuthStack.Screen name="CourseDetail" component={CourseDetailScreen} />
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen
         name="Register"
@@ -67,8 +71,8 @@ function AuthNavigator() {
 }
 
 function MainTabs() {
-  const { user, isGuest, exitGuestToLogin } = useAuth();
-  const tabLabels = getTabLabels(resolveSegment(isGuest, user?.rol));
+  const { user } = useAuth();
+  const tabLabels = getTabLabels(resolveSegment(false, user?.rol));
 
   return (
     <Tab.Navigator
@@ -124,12 +128,8 @@ function MainTabs() {
         options={{ title: 'Carrito', tabBarLabel: 'Carrito' }}
         listeners={{
           tabPress: (e) => {
-            if (isGuest) {
+            if (!user) {
               e.preventDefault();
-              Alert.alert('Registro requerido', 'Debes iniciar sesión para usar el carrito.', [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Registrarse / Entrar', onPress: () => exitGuestToLogin() }
-              ]);
             }
           }
         }}
@@ -140,7 +140,7 @@ function MainTabs() {
 }
 
 export function RootNavigator() {
-  const { user, isGuest, ready } = useAuth();
+  const { user, ready } = useAuth();
 
   useEffect(() => {
     if (ready) {
@@ -156,7 +156,7 @@ export function RootNavigator() {
     );
   }
 
-  const inApp = user != null || isGuest;
+  const inApp = user != null;
 
   return (
     <NavigationContainer theme={navTheme}>{inApp ? <MainTabs /> : <AuthNavigator />}</NavigationContainer>

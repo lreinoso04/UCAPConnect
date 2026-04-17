@@ -1,6 +1,8 @@
 import type { CursoResponse } from '../types/api';
 
 export type AuthStackParamList = {
+  CoursesList: undefined;
+  CourseDetail: { course: CursoResponse };
   Login: undefined;
   Register: undefined;
 };
