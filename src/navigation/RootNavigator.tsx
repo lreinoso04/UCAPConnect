@@ -78,7 +78,7 @@ function MainTabs() {
         headerTintColor: colors.onPrimary,
         headerTitleStyle: { fontWeight: typography.weight.semibold },
         tabBarActiveTintColor: colors.heroNavy,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarInactiveTintColor: '#475569',
         tabBarStyle: {
           backgroundColor: colors.card,
           borderTopColor: colors.border,

@@ -43,6 +43,7 @@ export function MyCoursesScreen() {
       <FlatList
         data={list}
         keyExtractor={item => item.id.toString()}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 90 }]}
         renderItem={({ item }) => (
           <View style={styles.courseCard}>

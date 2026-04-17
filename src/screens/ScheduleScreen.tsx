@@ -45,6 +45,7 @@ export function ScheduleScreen() {
       <FlatList
         data={upcomingEvents}
         keyExtractor={item => item.id.toString()}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 90 }]}
         renderItem={({ item }) => (
           <View style={styles.eventCard}>

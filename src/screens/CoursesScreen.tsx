@@ -195,6 +195,7 @@ export function CoursesScreen({ navigation }: Props) {
       <FlatList
         data={list}
         keyExtractor={(item) => `${item.id}-${item.title}`}
+        showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={styles.listContent}
         numColumns={1}
