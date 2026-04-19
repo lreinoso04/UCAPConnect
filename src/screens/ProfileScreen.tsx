@@ -18,6 +18,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getProfile, updateProfile } from '../api/student';
+import { changePassword } from '../api/auth';
 import { BirthDatePickerField } from '../components/BirthDatePickerField';
 import { useAuth } from '../context/AuthContext';
 import { ApiException } from '../api/client';
@@ -83,7 +84,9 @@ function Card({ children }: { children: ReactNode }) {
 
 export function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { user, isGuest, logout, exitGuestToLogin, updateUserImage } = useAuth();
+  const { user, logout, updateUserImage } = useAuth();
+  const isGuest = !user;
+  const exitGuestToLogin = () => {};
   const [form, setForm] = useState<EstudianteProfile>(emptyProfile);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -93,6 +96,13 @@ export function ProfileScreen() {
   /** Borrador del modal; no muta `form` hasta guardar correctamente. */
   const [draft, setDraft] = useState<EstudianteProfile | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ProfileFieldErrors>({});
+
+  const [pwModalOpen, setPwModalOpen] = useState(false);
+  const [pwCurrent, setPwCurrent] = useState('');
+  const [pwNew, setPwNew] = useState('');
+  const [pwConfirm, setPwConfirm] = useState('');
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwError, setPwError] = useState<string | null>(null);
 
   const isStudent = user?.rol === 'ESTUDIANTE';
 
@@ -196,6 +206,43 @@ export function ProfileScreen() {
     setFieldErrors({});
     setDraft({ ...form });
     setEditOpen(true);
+  }
+
+  function openPwModal() {
+    if (!isStudent) return;
+    setPwCurrent('');
+    setPwNew('');
+    setPwConfirm('');
+    setPwError(null);
+    setPwModalOpen(true);
+  }
+
+  function closePwModal() {
+    setPwModalOpen(false);
+    setPwLoading(false);
+  }
+
+  async function onSavePassword() {
+    if (!user?.token) return;
+    if (!pwCurrent || !pwNew || !pwConfirm) {
+      setPwError('Completa todos los campos');
+      return;
+    }
+    if (pwNew !== pwConfirm) {
+      setPwError('Las contraseñas nuevas no coinciden');
+      return;
+    }
+    setPwError(null);
+    setPwLoading(true);
+    try {
+      await changePassword({ currentPassword: pwCurrent, newPassword: pwNew, confirmPassword: pwConfirm }, user.token);
+      closePwModal();
+      Alert.alert('Éxito', 'Contraseña actualizada correctamente.');
+    } catch (e) {
+      setPwError(e instanceof ApiException ? e.message : 'No se pudo cambiar la contraseña');
+    } finally {
+      setPwLoading(false);
+    }
   }
 
   if (isGuest) {
@@ -330,7 +377,7 @@ export function ProfileScreen() {
             icon="lock-closed-outline"
             title="Seguridad y contraseña"
             subtitle={isStudent ? correoSub : user.username}
-            onPress={() => soon('Seguridad y contraseña')}
+            onPress={() => (isStudent ? openPwModal() : soon('Seguridad y contraseña'))}
           />
           <View style={styles.menuSep} />
           <MenuRow
@@ -513,6 +560,76 @@ export function ProfileScreen() {
               </Pressable>
             </View>
           </View>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
+
+      <Modal visible={pwModalOpen} animationType="slide" transparent onRequestClose={closePwModal}>
+        <View style={styles.modalRoot}>
+          <Pressable style={styles.modalBackdrop} onPress={closePwModal} />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 48 : 0}
+            style={styles.modalKeyboard}
+          >
+            <View style={styles.modalSheet}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Cambiar contraseña</Text>
+                <Pressable onPress={closePwModal} hitSlop={12} accessibilityLabel="Cerrar">
+                  <Ionicons name="close" size={26} color={colors.textMuted} />
+                </Pressable>
+              </View>
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.modalScroll}
+              >
+                <Text style={styles.label}>Contraseña actual</Text>
+                <TextInput
+                  style={styles.input}
+                  value={pwCurrent}
+                  onChangeText={setPwCurrent}
+                  secureTextEntry
+                  editable={!pwLoading}
+                />
+
+                <Text style={styles.label}>Nueva contraseña</Text>
+                <TextInput
+                  style={styles.input}
+                  value={pwNew}
+                  onChangeText={setPwNew}
+                  secureTextEntry
+                  editable={!pwLoading}
+                />
+
+                <Text style={styles.label}>Confirmar nueva contraseña</Text>
+                <TextInput
+                  style={styles.input}
+                  value={pwConfirm}
+                  onChangeText={setPwConfirm}
+                  secureTextEntry
+                  editable={!pwLoading}
+                />
+
+                {pwError ? <Text style={styles.error}>{pwError}</Text> : null}
+              </ScrollView>
+              <View style={styles.modalActions}>
+                <Pressable style={styles.modalCancel} onPress={closePwModal} disabled={pwLoading}>
+                  <Text style={styles.modalCancelText}>Cancelar</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.modalSave, pwLoading && styles.buttonDisabled]}
+                  onPress={() => void onSavePassword()}
+                  disabled={pwLoading}
+                >
+                  {pwLoading ? (
+                    <ActivityIndicator color={colors.onPrimary} />
+                  ) : (
+                    <Text style={styles.modalSaveText}>Guardar</Text>
+                  )}
+                </Pressable>
+              </View>
+            </View>
           </KeyboardAvoidingView>
         </View>
       </Modal>

@@ -28,7 +28,9 @@ function bulletsFromContent(raw: string | undefined): string[] {
 
 export function CourseDetailScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const { isGuest, exitGuestToLogin } = useAuth();
+  const { user } = useAuth();
+  const isGuest = !user;
+  const exitGuestToLogin = () => (navigation as any).navigate('Login');
   const { course } = route.params;
   const acf = course.acf || {};
 
@@ -79,7 +81,18 @@ export function CourseDetailScreen({ route, navigation }: Props) {
       </View>
 
       {course.imagen ? (
-        <Image source={{ uri: course.imagen }} style={styles.heroImg} contentFit="cover" />
+        <Image 
+          source={{ 
+            uri: String(course.imagen).trim(),
+            headers: { 
+              'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+              'Accept': 'image/avif,image/webp,*/*' 
+            }
+          }} 
+          style={[styles.heroImg, { width: '100%', height: 280 }]} 
+          contentFit="cover"
+          transition={300}
+        />
       ) : null}
 
       <View style={styles.pad}>

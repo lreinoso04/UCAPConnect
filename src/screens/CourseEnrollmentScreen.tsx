@@ -30,7 +30,8 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'CourseEnrollment'>;
 export function CourseEnrollmentScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { course } = route.params;
-  const { user, isGuest } = useAuth();
+  const { user } = useAuth();
+  const isGuest = !user;
 
   const [nombre, setNombre] = useState('');
   const [apellidos, setApellidos] = useState('');

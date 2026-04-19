@@ -16,7 +16,9 @@ type Props = {
 /** Pestañas del diseño aún sin API: Mis cursos, Horario, Notas */
 export function FeaturePlaceholderScreen({ icon, title, description }: Props) {
   const insets = useSafeAreaInsets();
-  const { isGuest, exitGuestToLogin } = useAuth();
+  const { user } = useAuth();
+  const isGuest = !user;
+  const exitGuestToLogin = () => {};
 
   return (
     <View style={[styles.wrap, { paddingTop: insets.top + spacing.lg }]}>

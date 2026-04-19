@@ -14,7 +14,9 @@ type Props = any; // Bypass TS mismatch temporarily for CartTab vs CartStack
 export function CartScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { items, totalSelected, toggleSelection, toggleAll, removeFromCart } = useCart();
-  const { isGuest, exitGuestToLogin } = useAuth();
+  const { user } = useAuth();
+  const isGuest = !user;
+  const exitGuestToLogin = () => {};
 
   const allSelected = items.length > 0 && items.every((i) => i.selected);
 

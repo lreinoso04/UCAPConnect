@@ -24,7 +24,8 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'Dashboard'>;
 
 export function DashboardScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const { user, isGuest } = useAuth();
+  const { user } = useAuth();
+  const isGuest = !user;
   const segment = resolveSegment(isGuest, user?.rol);
   const displayName = user?.username ?? 'Invitado';
   const quickItems = getDashboardQuickItems(segment);

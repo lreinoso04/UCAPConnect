@@ -234,7 +234,18 @@ export function CoursesScreen({ navigation }: Props) {
             >
               <View style={styles.cardCover}>
                 {item.imagen ? (
-                  <Image source={{ uri: item.imagen }} style={StyleSheet.absoluteFillObject} contentFit="cover" />
+                  <Image 
+                    source={{ 
+                      uri: String(item.imagen).trim(),
+                      headers: { 
+                        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+                        'Accept': 'image/avif,image/webp,*/*' 
+                      }
+                    }} 
+                    style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]} 
+                    contentFit="cover"
+                    transition={300}
+                  />
                 ) : (
                   <View style={[StyleSheet.absoluteFillObject, styles.cardImagePh]} />
                 )}

@@ -27,9 +27,9 @@ const windowH = Dimensions.get('window').height;
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
-export function LoginScreen({ navigation }: Props) {
+export function LoginScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
-  const { login, enterAsGuest, restoreSession } = useAuth();
+  const { login, restoreSession } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,6 +42,13 @@ export function LoginScreen({ navigation }: Props) {
     const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
     return () => { show.remove(); hide.remove(); };
   }, []);
+
+  useEffect(() => {
+    if (route.params?.emailConfirmed === 'true') {
+      Alert.alert('Éxito', 'Correo electrónico confirmado correctamente. ¡Ya puedes iniciar sesión!');
+      navigation.setParams({ emailConfirmed: undefined }); 
+    }
+  }, [route.params?.emailConfirmed, navigation]);
 
   async function onSubmit() {
     setError(null);
@@ -147,7 +154,7 @@ export function LoginScreen({ navigation }: Props) {
             </Pressable>
           </View>
 
-          <Pressable style={styles.guestLink} onPress={() => enterAsGuest()} disabled={loading}>
+          <Pressable style={styles.guestLink} onPress={() => navigation.navigate('CoursesList')} disabled={loading}>
             <Text style={styles.guestLinkText}>Registrar más tarde / Explorar catálogo</Text>
           </Pressable>
         </View>

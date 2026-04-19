@@ -158,7 +158,18 @@ export function RootNavigator() {
 
   const inApp = user != null;
 
+  const linking = {
+    prefixes: ['ucapconnect-mejoras://', 'https://ucapconnect.ing.software'],
+    config: {
+      screens: {
+        Login: 'login',
+      },
+    },
+  };
+
   return (
-    <NavigationContainer theme={navTheme}>{inApp ? <MainTabs /> : <AuthNavigator />}</NavigationContainer>
+    <NavigationContainer theme={navTheme} linking={linking}>
+      {inApp ? <MainTabs /> : <AuthNavigator />}
+    </NavigationContainer>
   );
 }

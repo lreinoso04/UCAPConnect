@@ -13,7 +13,8 @@ import { useAuth } from '../context/AuthContext';
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 
 export function HomeStackNavigator() {
-  const { isGuest } = useAuth();
+  const { user } = useAuth();
+  const isGuest = !user;
   return (
     <Stack.Navigator
       initialRouteName={isGuest ? 'CoursesList' : 'Dashboard'}
