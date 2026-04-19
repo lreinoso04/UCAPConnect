@@ -14,6 +14,7 @@ import { HomeStackNavigator } from './HomeStackNavigator';
 import { LoginScreen } from '../screens/LoginScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { ConfirmEmailScreen } from '../screens/ConfirmEmailScreen';
+import { ForgotPasswordScreen } from '../screens/ForgotPasswordScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { CoursesScreen } from '../screens/CoursesScreen';
 import { CourseDetailScreen } from '../screens/CourseDetailScreen';
@@ -72,7 +73,13 @@ function AuthNavigator() {
         component={ConfirmEmailScreen}
         options={{
           headerShown: false,
-          animationEnabled: true,
+        }}
+      />
+      <AuthStack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{
+          headerShown: false,
         }}
       />
     </AuthStack.Navigator>

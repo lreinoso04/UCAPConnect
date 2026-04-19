@@ -28,3 +28,10 @@ export function changePassword(payload: ChangePasswordRequestDTO, token: string)
     token,
   });
 }
+
+export function forgotPassword(email: string) {
+  return apiRequest<{ message: string }>('/api/v1/auth/forgot-password', {
+    method: 'POST',
+    body: { email },
+  });
+}

@@ -122,12 +122,7 @@ export function LoginScreen({ navigation, route }: Props) {
 
           <Pressable
             style={styles.forgotWrap}
-            onPress={() =>
-              Alert.alert(
-                'Recuperar contraseña',
-                'Contacta a la institución o usa el portal web cuando esté disponible.'
-              )
-            }
+            onPress={() => navigation.navigate('ForgotPassword')}
             disabled={loading}
           >
             <Text style={styles.forgot}>¿Olvidaste tu contraseña?</Text>
