@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -9,41 +8,32 @@ import {
   Text,
   TextInput,
   View,
+  ScrollView,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
+import { Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchCourses } from '../api/courses';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { ApiException } from '../api/client';
 import type { HomeStackParamList } from '../navigation/types';
 import type { CursoResponse } from '../types/api';
 import { resolveCourseCategoryLabel } from '../data/courseCategoryLabels';
 import { colors, layout, radius, spacing, typography } from '../theme';
 
-const PER_PAGE = 5;
+const PER_PAGE = 10;
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'CoursesList'>;
 
-function metaLine1(item: CursoResponse): string {
-  const acf = item.acf || {};
-  const modal = acf.modalidad != null ? String(acf.modalidad).trim() : '';
-  const rec = acf.recinto != null ? String(acf.recinto).trim() : '';
-  if (modal && rec) return `${modal} - ${rec}`;
-  if (modal) return modal;
-  if (rec) return rec;
-  return 'Consulta disponibilidad en el detalle';
+function getCardGradients(id: number) {
+  const palette = ['#f3858c', '#15838f', '#efb33f', '#52697b'];
+  return palette[id % palette.length];
 }
 
-function metaLine2(item: CursoResponse): string | null {
-  const acf = item.acf || {};
-  const hora = acf.hora != null ? String(acf.hora).trim() : '';
-  return hora || null;
-}
-
-/** Números de página visibles (máx. 5) alineado al mockup del catálogo. */
 function visiblePageNumbers(
   current: number,
   totalCount: number | null,
@@ -70,6 +60,8 @@ function visiblePageNumbers(
 export function CoursesScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const isGuest = !user;
+  const { cartCount } = useCart();
   const [list, setList] = useState<CursoResponse[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -80,6 +72,9 @@ export function CoursesScreen({ navigation }: Props) {
   const [draftSearch, setDraftSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState<number | null>(null);
+  const [activeFilter, setActiveFilter] = useState('Todos');
+
+  const filterOptions = ['Todos', 'Diplomados', 'Seminarios', 'Cursos', 'Talleres'];
 
   const load = useCallback(
     async (pageNum: number, opts?: { initial?: boolean; searchOverride?: string }) => {
@@ -95,12 +90,10 @@ export function CoursesScreen({ navigation }: Props) {
           search: q || undefined,
           token: user?.token ?? null,
         });
+        
         setList(data);
         setTotalCount(total);
-        const more =
-          total != null
-            ? pageNum * PER_PAGE < total
-            : data.length >= PER_PAGE;
+        const more = total != null ? pageNum * PER_PAGE < total : data.length >= PER_PAGE;
         setHasMore(more);
       } catch (e) {
         const msg = e instanceof ApiException ? e.message : 'No se pudieron cargar los cursos';
@@ -151,53 +144,135 @@ export function CoursesScreen({ navigation }: Props) {
     [page, totalCount, hasMore]
   );
 
-  const rangeLabel = useMemo(() => {
-    if (list.length === 0) return null;
-    const from = (page - 1) * PER_PAGE + 1;
-    const to = (page - 1) * PER_PAGE + list.length;
-    if (totalCount != null) {
-      return `Mostrando ${from}–${to} de ${totalCount} capacitación${totalCount !== 1 ? 'es' : ''}`;
-    }
-    return `Mostrando ${list.length} en esta página${search ? ` · “${search}”` : ''}`;
-  }, [list.length, page, totalCount, search]);
-
   return (
     <View style={styles.screen}>
-      <View style={[styles.hero, { paddingTop: insets.top + spacing.md }]}>
-        <Text style={styles.heroTitle}>Programas</Text>
-        <Text style={styles.heroSub}>Cursos, Diplomados y Talleres</Text>
-        <View style={styles.searchWrap}>
-          <Ionicons name="search" size={20} color={colors.textMuted} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Busca capacitaciones…"
-            placeholderTextColor={colors.textMuted}
-            value={draftSearch}
-            onChangeText={setDraftSearch}
-            onSubmitEditing={submitSearch}
-            returnKeyType="search"
-          />
+      <View style={[styles.hero, { paddingTop: insets.top + spacing.lg }]}>
+        <View style={styles.heroTopRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.heroTitle}>PROGRAMAS</Text>
+            <Text style={styles.heroSub}>Cursos, Diplomados y Talleres</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            {isGuest && (
+              <Pressable 
+                onPress={() => navigation.navigate('Login' as any)}
+                style={{ backgroundColor: '#041147', paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.pill }}
+              >
+                <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: 'bold' }}>Acceder</Text>
+              </Pressable>
+            )}
+            <Pressable style={styles.cartBtn} onPress={() => {
+              if (isGuest) {
+                Alert.alert('Registro requerido', 'Debes iniciar sesión para usar el carrito.', [
+                  { text: 'Cancelar', style: 'cancel' },
+                  { text: 'Entrar', onPress: () => navigation.navigate('Login' as any) }
+                ]);
+              } else {
+                navigation.navigate('Cart');
+              }
+            }}>
+              <Ionicons name="cart-outline" size={28} color="#041147" />
+              {cartCount > 0 && (
+                <View style={styles.badgeCount}>
+                  <Text style={styles.badgeCountTxt}>{cartCount}</Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
         </View>
-        <Pressable
-          style={styles.filterBtn}
-          onPress={() => Alert.alert('Filtros', 'Los filtros avanzados se habilitarán en una próxima versión.')}
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar cursos por título, tipo, modalidad, recinto o fecha..."
+          placeholderTextColor={colors.textMuted}
+          value={draftSearch}
+          onChangeText={setDraftSearch}
+          onSubmitEditing={submitSearch}
+          returnKeyType="search"
+        />
+
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterScroll}
         >
-          <Ionicons name="options-outline" size={20} color={colors.onPrimary} />
-          <Text style={styles.filterBtnText}>Filtros</Text>
-          <Ionicons name="chevron-down" size={18} color={colors.onPrimary} style={styles.filterChevron} />
-        </Pressable>
+          {filterOptions.map(f => (
+            <Pressable 
+              key={f} 
+              style={[styles.filterPill, activeFilter === f && styles.filterPillActive]}
+              onPress={() => setActiveFilter(f)}
+            >
+              <Text style={[styles.filterPillText, activeFilter === f && styles.filterPillTextActive]}>{f}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
       </View>
 
       {loading && !refreshing && list.length === 0 ? (
         <ActivityIndicator style={{ marginTop: spacing.xxl }} size="large" color={colors.primary} />
       ) : null}
+      
       {error ? <Text style={styles.bannerError}>{error}</Text> : null}
 
       <FlatList
         data={list}
         keyExtractor={(item) => `${item.id}-${item.title}`}
+        showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={styles.listContent}
+        numColumns={1}
+        renderItem={({ item }) => {
+          const cat = resolveCourseCategoryLabel(item.acf);
+          const recinto = item.acf?.recinto ? String(item.acf.recinto).trim() : 'N/A';
+          const modalidad = item.acf?.modalidad ? String(item.acf.modalidad).trim() : 'Virtual';
+          const fechaText = item.acf?.fecha_texto ?? item.acf?.fecha_inicio ?? 'Próximamente'; 
+          const stripColor = getCardGradients(item.id);
+
+          return (
+            <Pressable
+              style={styles.card}
+              onPress={() => navigation.navigate('CourseDetail', { course: item })}
+            >
+              <View style={styles.cardCover}>
+                {item.imagen ? (
+                  <Image 
+                    source={{ 
+                      uri: String(item.imagen).trim(),
+                      headers: { 
+                        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+                        'Accept': 'image/avif,image/webp,*/*' 
+                      }
+                    }} 
+                    style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]} 
+                    contentFit="cover"
+                    transition={300}
+                  />
+                ) : (
+                  <View style={[StyleSheet.absoluteFillObject, styles.cardImagePh]} />
+                )}
+                {/* Gradient for text readability */}
+                <View style={styles.gradientOverlay} />
+                
+                {recinto && recinto !== 'N/A' && (
+                  <View style={styles.topBadge}>
+                    <Text style={styles.topBadgeText}>{recinto}</Text>
+                  </View>
+                )}
+
+                <View style={styles.cardTextContent}>
+                  <Text style={styles.cardMeta}>{cat}</Text>
+                  <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
+                </View>
+              </View>
+
+              <View style={[styles.bottomStrip, { backgroundColor: stripColor }]}>
+                <Text style={styles.stripText}>{`${modalidad} | ${fechaText}`}</Text>
+              </View>
+            </Pressable>
+          );
+        }}
+        ListEmptyComponent={
+          !loading ? <Text style={styles.empty}>No hay cursos para mostrar.</Text> : null
+        }
         ListFooterComponent={
           list.length > 0 ? (
             <View style={styles.footer}>
@@ -207,11 +282,7 @@ export function CoursesScreen({ navigation }: Props) {
                   disabled={page <= 1 || pageLoading}
                   onPress={() => goToPage(page - 1)}
                 >
-                  <Ionicons
-                    name="chevron-back"
-                    size={20}
-                    color={page <= 1 ? colors.textMuted : colors.textMuted}
-                  />
+                  <Text style={styles.pageNumTxt}>{'<'}</Text>
                 </Pressable>
                 {pageNumbers.map((p) => (
                   <Pressable
@@ -229,74 +300,17 @@ export function CoursesScreen({ navigation }: Props) {
                   style={[
                     styles.pageArrow,
                     styles.pageArrowRight,
-                    (totalCount != null
-                      ? page >= Math.ceil(totalCount / PER_PAGE)
-                      : !hasMore) && styles.pageArrowDisabled,
+                    (totalCount != null ? page >= Math.ceil(totalCount / PER_PAGE) : !hasMore) && styles.pageArrowDisabled,
                   ]}
-                  disabled={
-                    pageLoading ||
-                    (totalCount != null ? page >= Math.ceil(totalCount / PER_PAGE) : !hasMore)
-                  }
+                  disabled={pageLoading || (totalCount != null ? page >= Math.ceil(totalCount / PER_PAGE) : !hasMore)}
                   onPress={() => goToPage(page + 1)}
                 >
-                  <Ionicons
-                    name="chevron-forward"
-                    size={20}
-                    color={
-                      totalCount != null
-                        ? page >= Math.ceil(totalCount / PER_PAGE)
-                          ? colors.border
-                          : colors.primary
-                        : !hasMore
-                          ? colors.border
-                          : colors.primary
-                    }
-                  />
+                  <Text style={styles.pageNumTxt}>{'>'}</Text>
                 </Pressable>
               </View>
-              {pageLoading ? (
-                <ActivityIndicator style={{ marginTop: spacing.sm }} color={colors.primary} />
-              ) : null}
-              {rangeLabel ? <Text style={styles.countLineFooter}>{rangeLabel}</Text> : null}
             </View>
           ) : null
         }
-        ListEmptyComponent={
-          !loading ? <Text style={styles.empty}>No hay cursos para mostrar.</Text> : null
-        }
-        ListHeaderComponent={
-          list.length > 0 ? (
-            <Text style={styles.countLine}>
-              Resultados · toca una tarjeta para ver el detalle
-            </Text>
-          ) : null
-        }
-        renderItem={({ item }) => (
-          <Pressable
-            style={styles.card}
-            onPress={() => navigation.navigate('CourseDetail', { course: item })}
-          >
-            <View style={styles.cardImageWrap}>
-              {item.imagen ? (
-                <Image source={{ uri: item.imagen }} style={styles.cardImage} contentFit="cover" />
-              ) : (
-                <View style={[styles.cardImage, styles.cardImagePh]} />
-              )}
-              <View style={styles.badge}>
-                <Text style={styles.badgeText} numberOfLines={1}>
-                  {resolveCourseCategoryLabel(item.acf)}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.cardBody}>
-              <Text style={styles.cardTitle} numberOfLines={2}>
-                {item.title}
-              </Text>
-              <Text style={styles.cardMeta}>{metaLine1(item)}</Text>
-              {metaLine2(item) ? <Text style={styles.cardMetaSecondary}>{metaLine2(item)}</Text> : null}
-            </View>
-          </Pressable>
-        )}
       />
     </View>
   );
@@ -305,51 +319,84 @@ export function CoursesScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
   hero: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: layout.screenPadding,
     paddingBottom: spacing.lg,
+    paddingTop: spacing.xl,
   },
-  heroTitle: {
-    fontSize: typography.size.xl,
-    fontWeight: typography.weight.bold,
-    color: colors.textOnDark,
-  },
-  heroSub: {
-    marginTop: spacing.xs,
-    fontSize: typography.size.sm,
-    color: 'rgba(255,255,255,0.88)',
-    marginBottom: spacing.md,
-  },
-  searchWrap: {
+  heroTopRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.inputFill,
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.sm,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
-  searchIcon: { marginRight: spacing.sm },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 12,
-    fontSize: typography.size.body,
-    color: colors.text,
+  cartBtn: {
+    padding: spacing.xs,
+    position: 'relative',
   },
-  filterBtn: {
-    flexDirection: 'row',
+  badgeCount: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#FF8300',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.interactiveBlue,
-    paddingVertical: 12,
-    borderRadius: radius.pill,
   },
-  filterBtnText: {
-    color: colors.onPrimary,
-    fontWeight: typography.weight.semibold,
+  badgeCountTxt: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  heroTitle: {
+    fontSize: typography.size.xxl,
+    fontWeight: typography.weight.bold,
+    color: '#041147',
+    textTransform: 'uppercase',
+  },
+  heroSub: {
+    marginTop: 4,
     fontSize: typography.size.md,
-    marginHorizontal: spacing.sm,
+    color: '#FF8300',
+    fontWeight: typography.weight.bold,
+    marginBottom: spacing.lg,
   },
-  filterChevron: { marginLeft: spacing.xs },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    fontSize: typography.size.body,
+    backgroundColor: colors.surface,
+    color: colors.text,
+    marginBottom: spacing.sm,
+  },
+  filterScroll: {
+    paddingVertical: spacing.xs,
+    gap: spacing.sm,
+  },
+  filterPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  filterPillActive: {
+    backgroundColor: '#FF8300',
+    borderColor: '#FF8300',
+  },
+  filterPillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+  filterPillTextActive: {
+    color: '#FFF',
+  },
   bannerError: {
     marginHorizontal: layout.screenPadding,
     marginTop: spacing.sm,
@@ -360,113 +407,82 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: layout.screenPadding,
-    paddingTop: spacing.md,
+    paddingTop: spacing.sm,
     paddingBottom: spacing.xxxl,
-  },
-  countLine: {
-    fontSize: typography.size.sm,
-    color: colors.textMuted,
-    marginBottom: spacing.md,
-  },
-  footer: { marginTop: spacing.md, paddingBottom: spacing.lg },
-  pagination: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  pageArrow: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pageArrowLeft: {
-    backgroundColor: '#E8EAEF',
-  },
-  pageArrowRight: {
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  pageArrowDisabled: {
-    opacity: 0.45,
-  },
-  pageNumBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pageNumBtnActive: {
-    backgroundColor: colors.primary,
-  },
-  pageNumBtnIdle: {
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  pageNumTxt: {
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.bold,
-  },
-  pageNumTxtActive: { color: colors.textOnDark },
-  pageNumTxtIdle: { color: colors.primary },
-  countLineFooter: {
-    marginTop: spacing.md,
-    fontSize: typography.size.sm,
-    color: colors.textMuted,
-    textAlign: 'center',
   },
   card: {
     backgroundColor: colors.card,
     borderRadius: radius.md,
     marginBottom: spacing.lg,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 2,
+    elevation: 3,
   },
-  cardImageWrap: { position: 'relative' },
-  cardImage: { width: '100%', height: 160, backgroundColor: colors.border },
+  cardCover: {
+    height: 240,
+    width: '100%',
+    position: 'relative',
+    justifyContent: 'flex-end',
+  },
   cardImagePh: { backgroundColor: '#cfd8e8' },
-  badge: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-    backgroundColor: colors.accentYellow,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 5,
-    borderRadius: radius.sm,
-    maxWidth: '75%',
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
-  badgeText: {
+  topBadge: {
+    position: 'absolute',
+    top: spacing.md,
+    right: spacing.md,
+    backgroundColor: '#FF8300',
+    paddingHorizontal: spacing.md,
+    paddingVertical: 4,
+    borderRadius: radius.pill,
+  },
+  topBadgeText: {
+    color: '#FFFFFF',
     fontSize: typography.size.xs,
     fontWeight: typography.weight.bold,
-    color: colors.text,
   },
-  cardBody: { padding: spacing.md },
-  cardTitle: {
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.bold,
-    color: colors.primary,
+  cardTextContent: {
+    padding: spacing.lg,
   },
   cardMeta: {
-    marginTop: spacing.xs,
+    color: '#FFFFFF',
     fontSize: typography.size.sm,
-    color: colors.textMuted,
+    fontWeight: typography.weight.semibold,
+    marginBottom: 4,
   },
-  cardMetaSecondary: {
-    marginTop: 4,
+  cardTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: typography.weight.bold,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  bottomStrip: {
+    paddingVertical: 10,
+    paddingHorizontal: spacing.lg,
+  },
+  stripText: {
+    color: '#FFFFFF',
     fontSize: typography.size.sm,
-    color: colors.textMuted,
+    fontWeight: typography.weight.medium,
   },
+  footer: { marginTop: spacing.md, paddingBottom: spacing.lg },
+  pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
+  pageArrow: { width: 40, height: 40, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+  pageArrowLeft: {},
+  pageArrowRight: {},
+  pageArrowDisabled: { opacity: 0.4 },
+  pageNumBtn: { width: 40, height: 40, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  pageNumBtnActive: { backgroundColor: '#041147' },
+  pageNumBtnIdle: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+  pageNumTxt: { fontSize: typography.size.md, fontWeight: typography.weight.bold },
+  pageNumTxtActive: { color: colors.textOnDark },
+  pageNumTxtIdle: { color: colors.text },
   empty: { textAlign: 'center', marginTop: spacing.xxxl, color: colors.textMuted },
 });

@@ -1,0 +1,42 @@
+# Plan de Implementación: UCAP Connect (7 Pantallas + APIs)
+
+He modificado el plan para incorporar la conexión al nuevo Swagger, el diseño exacto de la página web para el catálogo y la nueva funcionalidad de Carrito de Compras tipo Amazon.
+
+## 1. Conexión al Nuevo Backend (API REST)
+**Objetivo:** Transicionar todas las peticiones a la nueva URL proveída.
+- **Base URL:** Extraer endpoints del Swagger en `https://ucapconnect.ing.software/`.
+- **Modificación:** Actualizar los archivos dentro de `src/api/` (gestión de `client.ts` o similares) para apuntar a la nueva API base, revisar los *payloads* esperados por el Swagger para Login, Registro, y Catálogo de cursos.
+
+## 2. Navegación y Arranque
+- Al momento de abrir la app sin sesión previa, **se cargará la pantalla de "Programas" de manera predeterminada**.
+- Las opciones que demandan usuario (Perfil, Mis Cursos, Horarios o proceder a Pagar) dispararán la pantalla de `LoginScreen`.
+
+## 3. Pantalla 1: Programas (Catálogo Inicial Público)
+**Archivo a modificar:** `src/screens/CoursesScreen.tsx`
+- **Cambio de Diseño Radar (según el nuevo screenshot web):**
+  - **Cabecera:** Textos "PROGRAMAS" en azul oscuro y "Cursos, Diplomados y Talleres" en naranja.
+  - **Buscador:** Barra de búsqueda ancha estilo input con el placeholder exacto: *"Buscar cursos por título, tipo, modalidad, recinto o fecha..."*.
+  - **Tarjetas de Curso:** Cambiaremos las tarjetas a un estilo donde la imagen ocupe todo el fondo con oscurecimiento inferior (gradiente), colocando sobre la imagen el *chip* de recinto (ej. "Santiago" en naranja superior derecha), el título y tipo en blanco, y en el pie corto de color la modalidad y fecha de inicio.
+
+## 4. [NUEVO] Pantalla 2: Carrito de Compras estilo Amazon
+**Nuevos Archivos:** `src/screens/CartScreen.tsx` y `src/context/CartContext.tsx`
+- **Funcionalidad:**
+  - Capacidad para agregar cursos/programas desde la vista de detalle.
+  - La pantalla listará todo lo agregado con **casillas de selección (checkboxes)** independientes para cada curso.
+  - El usuario podrá seleccionar o deseleccionar cursos individuales antes de pagar, recalculando el subtotal dinámicamente en una barra inferior.
+  - **Flujo de Pago:** Si se presiona "Proceder al pago", obligará al Login (si no lo está) preservando la sesión del carrito de compras.
+
+## 5. Pantallas 3: Login
+**Archivo a modificar:** `src/screens/LoginScreen.tsx`
+- Adaptado milimétricamente al panel izquierdo del primer mockup enviado: logo top, campos grises y eliminando el botón "explorar sin cuenta" ya que la app está abierta por defecto.
+
+## 6. Pantallas 4 a 7: Home, Mis Cursos, Horarios y Perfil
+**Archivos:** `DashboardScreen.tsx`, `MyCoursesScreen.tsx`, `ScheduleScreen.tsx`, `ProfileScreen.tsx`
+- **Dashboard (Home):** Píldoras de colores y datos de bienvenida.
+- **Mis Cursos:** Pestañas estilo "pill" de "En progreso", "Completados". Barras de progreso por curso.
+- **Horarios:** Cinta superior de días de calendario, tarjetas de clase y botón "Exportar a Google Calendar".
+- **Perfil:** Top cover gigante Azul UAPA (#041147), icono de usuario colosal rodeado de estadísticas de desempeño del estudiante (Cursos = 3, Promedio = 8.5) y listados tipo flecha lateral para los menús internos.
+
+> [!IMPORTANT]
+> **Aprobación Requerida**
+> Por favor revisa este plan actualizado. Si estás satisfecho con la inclusión de las APIs de `ucapconnect.ing.software`, el rediseño específico de "Programas" (tarjetas con gradiente) y el comportamiento multiselección del Carrito de Compras (estilo Amazon), confírmame para proceder inmediatamente con el código de todo esto.

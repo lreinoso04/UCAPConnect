@@ -14,9 +14,11 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getProfile, updateProfile } from '../api/student';
+import { changePassword } from '../api/auth';
 import { BirthDatePickerField } from '../components/BirthDatePickerField';
 import { useAuth } from '../context/AuthContext';
 import { ApiException } from '../api/client';
@@ -82,7 +84,9 @@ function Card({ children }: { children: ReactNode }) {
 
 export function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { user, isGuest, logout, exitGuestToLogin } = useAuth();
+  const { user, logout, updateUserImage } = useAuth();
+  const isGuest = !user;
+  const exitGuestToLogin = () => {};
   const [form, setForm] = useState<EstudianteProfile>(emptyProfile);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -92,6 +96,13 @@ export function ProfileScreen() {
   /** Borrador del modal; no muta `form` hasta guardar correctamente. */
   const [draft, setDraft] = useState<EstudianteProfile | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ProfileFieldErrors>({});
+
+  const [pwModalOpen, setPwModalOpen] = useState(false);
+  const [pwCurrent, setPwCurrent] = useState('');
+  const [pwNew, setPwNew] = useState('');
+  const [pwConfirm, setPwConfirm] = useState('');
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwError, setPwError] = useState<string | null>(null);
 
   const isStudent = user?.rol === 'ESTUDIANTE';
 
@@ -165,12 +176,73 @@ export function ProfileScreen() {
     Alert.alert(title, 'Esta opción estará disponible en una próxima versión.');
   }
 
+  async function onPickImage() {
+    if (!isStudent) return;
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert('Permiso denegado', 'Se necesita acceso a tus fotos para cambiar la imagen del perfil.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        await updateUserImage(result.assets[0].uri);
+        Alert.alert('Listo', 'Foto de perfil actualizada correctamente.');
+      }
+    } catch (e) {
+      console.error(e);
+      Alert.alert('Error', 'Hubo un problema al seleccionar la imagen.');
+    }
+  }
+
   function openPersonalDataEditor() {
     if (!isStudent) return;
     setSaveError(null);
     setFieldErrors({});
     setDraft({ ...form });
     setEditOpen(true);
+  }
+
+  function openPwModal() {
+    if (!isStudent) return;
+    setPwCurrent('');
+    setPwNew('');
+    setPwConfirm('');
+    setPwError(null);
+    setPwModalOpen(true);
+  }
+
+  function closePwModal() {
+    setPwModalOpen(false);
+    setPwLoading(false);
+  }
+
+  async function onSavePassword() {
+    if (!user?.token) return;
+    if (!pwCurrent || !pwNew || !pwConfirm) {
+      setPwError('Completa todos los campos');
+      return;
+    }
+    if (pwNew !== pwConfirm) {
+      setPwError('Las contraseñas nuevas no coinciden');
+      return;
+    }
+    setPwError(null);
+    setPwLoading(true);
+    try {
+      await changePassword({ currentPassword: pwCurrent, newPassword: pwNew, confirmPassword: pwConfirm }, user.token);
+      closePwModal();
+      Alert.alert('Éxito', 'Contraseña actualizada correctamente.');
+    } catch (e) {
+      setPwError(e instanceof ApiException ? e.message : 'No se pudo cambiar la contraseña');
+    } finally {
+      setPwLoading(false);
+    }
   }
 
   if (isGuest) {
@@ -222,7 +294,7 @@ export function ProfileScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={[styles.hero, { paddingTop: insets.top + spacing.lg }]}>
-        <View style={styles.avatarRing}>
+        <Pressable style={styles.avatarRing} onPress={() => void onPickImage()}>
           {user.img ? (
             <Image source={{ uri: user.img }} style={styles.avatarImg} contentFit="cover" />
           ) : (
@@ -230,7 +302,10 @@ export function ProfileScreen() {
               <Ionicons name="person" size={48} color="#9ca3af" />
             </View>
           )}
-        </View>
+          <View style={styles.editBadge}>
+            <Ionicons name="camera" size={16} color="#FFF" />
+          </View>
+        </Pressable>
         <Text style={styles.heroName}>{fullName}</Text>
         <Text style={styles.heroId}>{idLine}</Text>
 
@@ -302,7 +377,7 @@ export function ProfileScreen() {
             icon="lock-closed-outline"
             title="Seguridad y contraseña"
             subtitle={isStudent ? correoSub : user.username}
-            onPress={() => soon('Seguridad y contraseña')}
+            onPress={() => (isStudent ? openPwModal() : soon('Seguridad y contraseña'))}
           />
           <View style={styles.menuSep} />
           <MenuRow
@@ -488,6 +563,76 @@ export function ProfileScreen() {
           </KeyboardAvoidingView>
         </View>
       </Modal>
+
+      <Modal visible={pwModalOpen} animationType="slide" transparent onRequestClose={closePwModal}>
+        <View style={styles.modalRoot}>
+          <Pressable style={styles.modalBackdrop} onPress={closePwModal} />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 48 : 0}
+            style={styles.modalKeyboard}
+          >
+            <View style={styles.modalSheet}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Cambiar contraseña</Text>
+                <Pressable onPress={closePwModal} hitSlop={12} accessibilityLabel="Cerrar">
+                  <Ionicons name="close" size={26} color={colors.textMuted} />
+                </Pressable>
+              </View>
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.modalScroll}
+              >
+                <Text style={styles.label}>Contraseña actual</Text>
+                <TextInput
+                  style={styles.input}
+                  value={pwCurrent}
+                  onChangeText={setPwCurrent}
+                  secureTextEntry
+                  editable={!pwLoading}
+                />
+
+                <Text style={styles.label}>Nueva contraseña</Text>
+                <TextInput
+                  style={styles.input}
+                  value={pwNew}
+                  onChangeText={setPwNew}
+                  secureTextEntry
+                  editable={!pwLoading}
+                />
+
+                <Text style={styles.label}>Confirmar nueva contraseña</Text>
+                <TextInput
+                  style={styles.input}
+                  value={pwConfirm}
+                  onChangeText={setPwConfirm}
+                  secureTextEntry
+                  editable={!pwLoading}
+                />
+
+                {pwError ? <Text style={styles.error}>{pwError}</Text> : null}
+              </ScrollView>
+              <View style={styles.modalActions}>
+                <Pressable style={styles.modalCancel} onPress={closePwModal} disabled={pwLoading}>
+                  <Text style={styles.modalCancelText}>Cancelar</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.modalSave, pwLoading && styles.buttonDisabled]}
+                  onPress={() => void onSavePassword()}
+                  disabled={pwLoading}
+                >
+                  {pwLoading ? (
+                    <ActivityIndicator color={colors.onPrimary} />
+                  ) : (
+                    <Text style={styles.modalSaveText}>Guardar</Text>
+                  )}
+                </Pressable>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -523,6 +668,24 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+  },
+  editBadge: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.heroNavy,
+    borderWidth: 3,
+    borderColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
   heroName: {
     fontSize: typography.size.xl,
@@ -701,12 +864,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: radius.pill,
     alignItems: 'center',
-    backgroundColor: '#ffebee',
+    backgroundColor: '#ffeaeb',
     borderWidth: 1,
-    borderColor: colors.error,
+    borderColor: '#ff4c4c',
   },
   logoutBtnText: {
-    color: colors.error,
+    color: '#ff3030',
     fontWeight: typography.weight.bold,
     fontSize: typography.size.body,
   },

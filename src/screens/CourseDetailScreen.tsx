@@ -1,4 +1,4 @@
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import type { HomeStackParamList } from '../navigation/types';
 import { resolveCourseCategoryLabel } from '../data/courseCategoryLabels';
 import { colors, layout, radius, spacing, typography } from '../theme';
 import { formatFechaInicio } from '../utils/courseDates';
+import { useAuth } from '../context/AuthContext';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'CourseDetail'>;
 
@@ -27,6 +28,9 @@ function bulletsFromContent(raw: string | undefined): string[] {
 
 export function CourseDetailScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const isGuest = !user;
+  const exitGuestToLogin = () => (navigation as any).navigate('Login');
   const { course } = route.params;
   const acf = course.acf || {};
 
@@ -77,7 +81,18 @@ export function CourseDetailScreen({ route, navigation }: Props) {
       </View>
 
       {course.imagen ? (
-        <Image source={{ uri: course.imagen }} style={styles.heroImg} contentFit="cover" />
+        <Image 
+          source={{ 
+            uri: String(course.imagen).trim(),
+            headers: { 
+              'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+              'Accept': 'image/avif,image/webp,*/*' 
+            }
+          }} 
+          style={[styles.heroImg, { width: '100%', height: 280 }]} 
+          contentFit="cover"
+          transition={300}
+        />
       ) : null}
 
       <View style={styles.pad}>
@@ -155,16 +170,23 @@ export function CourseDetailScreen({ route, navigation }: Props) {
 
         <Pressable
           style={styles.btnPrimary}
-          onPress={() => navigation.navigate('CourseEnrollment', { course })}
+          onPress={() => {
+            if (isGuest) {
+              Alert.alert('Registro requerido', 'Debes iniciar sesión para inscribirte.', [
+                { text: 'Cancelar', style: 'cancel' },
+                { text: 'Entrar', onPress: () => exitGuestToLogin() }
+              ]);
+            } else {
+              navigation.navigate('CourseEnrollment', { course });
+            }
+          }}
         >
           <Text style={styles.btnPrimaryTxt}>Solicitar inscribirse</Text>
         </Pressable>
 
-        {course.link ? (
-          <Pressable style={styles.btnOutline} onPress={() => Linking.openURL(course.link)}>
-            <Text style={styles.btnOutlineTxt}>Más información</Text>
-          </Pressable>
-        ) : null}
+        <Pressable style={styles.btnOutline} onPress={() => Linking.openURL('https://docs.google.com/forms/d/e/1FAIpQLSdbavZ2adm2ytkCtTU3qUd8zb2_kHLGKiunIFuSwYKCQFSYKA/viewform')}>
+          <Text style={styles.btnOutlineTxt}>Más información</Text>
+        </Pressable>
       </View>
     </ScrollView>
   );
