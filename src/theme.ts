@@ -16,6 +16,7 @@ export const colors = {
   text: '#1a1a1a',
   textMuted: '#6b7280',
   textOnDark: '#ffffff',
+  onSurface: '#1a1a1a',
   border: '#e5e7eb',
   accent: '#FF8300',
   accentYellow: '#FFB800',
