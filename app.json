@@ -7,7 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme": "ucapconnect-mejoras",
+    "scheme": "ucapconnect",
     "platforms": [
       "ios",
       "android"

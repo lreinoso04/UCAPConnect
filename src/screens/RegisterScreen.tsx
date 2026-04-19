@@ -78,7 +78,7 @@ export function RegisterScreen({ navigation }: Props) {
         username: username.trim(),
         password,
       });
-      Alert.alert('Registro exitoso', 'Registro satisfactorio. Ahora puedes iniciar sesión.', [
+      Alert.alert('Registro exitoso', 'Hemos enviado un correo de verificación a tu cuenta.', [
         { text: 'OK', onPress: () => navigation.navigate('Login') }
       ]);
     } catch (e) {

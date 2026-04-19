@@ -13,6 +13,7 @@ import { HomeStackNavigator } from './HomeStackNavigator';
 
 import { LoginScreen } from '../screens/LoginScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
+import { ConfirmEmailScreen } from '../screens/ConfirmEmailScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { CoursesScreen } from '../screens/CoursesScreen';
 import { CourseDetailScreen } from '../screens/CourseDetailScreen';
@@ -64,6 +65,14 @@ function AuthNavigator() {
           headerStyle: { backgroundColor: colors.primary },
           headerTintColor: colors.onPrimary,
           title: 'Registro',
+        }}
+      />
+      <AuthStack.Screen
+        name="ConfirmEmail"
+        component={ConfirmEmailScreen}
+        options={{
+          headerShown: false,
+          animationEnabled: true,
         }}
       />
     </AuthStack.Navigator>
@@ -151,10 +160,11 @@ export function RootNavigator() {
   if (!ready) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surface }}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
+        <ActivityIndicator ://', 'https://ucapconnect.ing.software'],
+    config: {
+      screens: {
+        Login: 'login',
+        ConfirmEmail: 'confirm-email
 
   const inApp = user != null;
 

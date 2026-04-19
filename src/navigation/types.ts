@@ -5,6 +5,7 @@ export type AuthStackParamList = {
   CourseDetail: { course: CursoResponse };
   Login: { emailConfirmed?: string } | undefined;
   Register: undefined;
+  ConfirmEmail: { status: 'success' | 'error' };
 };
 
 export type HomeStackParamList = {
