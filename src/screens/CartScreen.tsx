@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, Alert } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
+import { Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -17,6 +17,7 @@ export function CartScreen({ navigation }: Props) {
   const { user } = useAuth();
   const isGuest = !user;
   const exitGuestToLogin = () => {};
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
 
   const allSelected = items.length > 0 && items.every((i) => i.selected);
 
@@ -78,8 +79,13 @@ export function CartScreen({ navigation }: Props) {
               />
             </Pressable>
             
-            {item.course.imagen ? (
-              <Image source={{ uri: item.course.imagen }} style={styles.image} contentFit="cover" />
+            {item.course.imagen && !failedImages.has(item.course.id) ? (
+              <Image 
+                source={{ uri: item.course.imagen.replace('https://', 'http://') }} 
+                style={styles.image} 
+                resizeMode="cover" 
+                onError={() => setFailedImages(prev => new Set(prev).add(item.course.id))}
+              />
             ) : (
               <View style={[styles.image, { backgroundColor: '#e2e8f0' }]} />
             )}

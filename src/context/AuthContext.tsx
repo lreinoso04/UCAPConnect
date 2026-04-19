@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { login as apiLogin, logout as apiLogout, registerStudent } from '../api/auth';
+import { uploadProfilePicture } from '../api/student';
 import { clearStoredSession, loadAuth, saveAuth, type StoredAuth } from '../storage/authStorage';
 import { loadGuestSession, setGuestSession } from '../storage/guestStorage';
 import type { RegisterPayload } from '../types/api';
@@ -92,11 +93,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateUserImage = useCallback(async (uri: string) => {
-    if (user) {
-      const nextUser = { ...user, img: uri };
-      await saveAuth(nextUser);
-      setUser(nextUser);
-    }
+    if (!user) return;
+
+    const uploadResult = await uploadProfilePicture(user.token, uri);
+    const nextUser = { ...user, img: uploadResult.fileName };
+    await saveAuth(nextUser);
+    setUser(nextUser);
   }, [user]);
 
   const value = useMemo(

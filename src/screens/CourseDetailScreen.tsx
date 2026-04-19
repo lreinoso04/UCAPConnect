@@ -1,8 +1,9 @@
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image } from 'expo-image';
+import { Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useState } from 'react';
 import type { HomeStackParamList } from '../navigation/types';
 import { resolveCourseCategoryLabel } from '../data/courseCategoryLabels';
 import { colors, layout, radius, spacing, typography } from '../theme';
@@ -33,6 +34,7 @@ export function CourseDetailScreen({ route, navigation }: Props) {
   const exitGuestToLogin = () => (navigation as any).navigate('Login');
   const { course } = route.params;
   const acf = course.acf || {};
+  const [imageError, setImageError] = useState(false);
 
   const category = resolveCourseCategoryLabel(course.acf);
   const fechaInicio =
@@ -80,18 +82,14 @@ export function CourseDetailScreen({ route, navigation }: Props) {
         </View>
       </View>
 
-      {course.imagen ? (
+      {course.imagen && !imageError ? (
         <Image 
           source={{ 
-            uri: String(course.imagen).trim(),
-            headers: { 
-              'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
-              'Accept': 'image/avif,image/webp,*/*' 
-            }
+            uri: String(course.imagen).trim().replace('https://', 'http://')
           }} 
           style={[styles.heroImg, { width: '100%', height: 280 }]} 
-          contentFit="cover"
-          transition={300}
+          resizeMode="cover"
+          onError={() => setImageError(true)}
         />
       ) : null}
 
