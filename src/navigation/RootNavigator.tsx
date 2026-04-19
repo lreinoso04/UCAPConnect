@@ -160,19 +160,19 @@ export function RootNavigator() {
   if (!ready) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surface }}>
-        <ActivityIndicator ://', 'https://ucapconnect.ing.software'],
-    config: {
-      screens: {
-        Login: 'login',
-        ConfirmEmail: 'confirm-email
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   const inApp = user != null;
 
   const linking = {
-    prefixes: ['ucapconnect-mejoras://', 'https://ucapconnect.ing.software'],
+    prefixes: ['ucapconnect://', 'https://ucapconnect.ing.software'],
     config: {
       screens: {
         Login: 'login',
+        ConfirmEmail: 'confirm-email',
       },
     },
   };
