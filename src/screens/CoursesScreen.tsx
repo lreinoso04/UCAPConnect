@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image } from 'expo-image';
+import { Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -73,6 +73,7 @@ export function CoursesScreen({ navigation }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [activeFilter, setActiveFilter] = useState('Todos');
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
 
   const filterOptions = ['Todos', 'Diplomados', 'Seminarios', 'Cursos', 'Talleres'];
 
@@ -233,18 +234,14 @@ export function CoursesScreen({ navigation }: Props) {
               onPress={() => navigation.navigate('CourseDetail', { course: item })}
             >
               <View style={styles.cardCover}>
-                {item.imagen ? (
+                {item.imagen && !failedImages.has(item.id) ? (
                   <Image 
                     source={{ 
-                      uri: String(item.imagen).trim(),
-                      headers: { 
-                        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
-                        'Accept': 'image/avif,image/webp,*/*' 
-                      }
+                      uri: String(item.imagen).trim().replace('https://', 'http://')
                     }} 
                     style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]} 
-                    contentFit="cover"
-                    transition={300}
+                    resizeMode="cover"
+                    onError={() => setFailedImages(prev => new Set(prev).add(item.id))}
                   />
                 ) : (
                   <View style={[StyleSheet.absoluteFillObject, styles.cardImagePh]} />
