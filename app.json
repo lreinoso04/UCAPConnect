@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "UCAPConnect",
+    "slug": "ucapconnect",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "ucapconnect",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0d47a1"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "edu.uapa.ucapconnect"
+    },
+    "android": {
+      "package": "edu.uapa.ucapconnect",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0d47a1"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7bcfba58-8a80-49e3-8726-003eaa70c717"
+      }
+    },
+    "owner": "misael-marcano0530s-organization",
+    "plugins": [
+      "expo-secure-store",
+      "expo-font",
+      "@react-native-community/datetimepicker"
+    ]
+  }
+}
