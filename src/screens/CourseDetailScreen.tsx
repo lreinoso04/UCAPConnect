@@ -83,11 +83,11 @@ export function CourseDetailScreen({ route, navigation }: Props) {
       </View>
 
       {course.imagen && !imageError ? (
-        <Image 
-          source={{ 
-            uri: String(course.imagen).trim().replace('https://', 'http://')
-          }} 
-          style={[styles.heroImg, { width: '100%', height: 280 }]} 
+        <Image
+          source={{
+            uri: String(course.imagen).trim()
+          }}
+          style={[styles.heroImg, { width: '100%', height: 280 }]}
           resizeMode="cover"
           onError={() => setImageError(true)}
         />

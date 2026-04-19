@@ -91,7 +91,7 @@ export function CoursesScreen({ navigation }: Props) {
           search: q || undefined,
           token: user?.token ?? null,
         });
-        
+
         setList(data);
         setTotalCount(total);
         const more = total != null ? pageNum * PER_PAGE < total : data.length >= PER_PAGE;
@@ -155,7 +155,7 @@ export function CoursesScreen({ navigation }: Props) {
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
             {isGuest && (
-              <Pressable 
+              <Pressable
                 onPress={() => navigation.navigate('Login' as any)}
                 style={{ backgroundColor: '#041147', paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.pill }}
               >
@@ -191,14 +191,14 @@ export function CoursesScreen({ navigation }: Props) {
           returnKeyType="search"
         />
 
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterScroll}
         >
           {filterOptions.map(f => (
-            <Pressable 
-              key={f} 
+            <Pressable
+              key={f}
               style={[styles.filterPill, activeFilter === f && styles.filterPillActive]}
               onPress={() => setActiveFilter(f)}
             >
@@ -211,7 +211,7 @@ export function CoursesScreen({ navigation }: Props) {
       {loading && !refreshing && list.length === 0 ? (
         <ActivityIndicator style={{ marginTop: spacing.xxl }} size="large" color={colors.primary} />
       ) : null}
-      
+
       {error ? <Text style={styles.bannerError}>{error}</Text> : null}
 
       <FlatList
@@ -225,7 +225,7 @@ export function CoursesScreen({ navigation }: Props) {
           const cat = resolveCourseCategoryLabel(item.acf);
           const recinto = item.acf?.recinto ? String(item.acf.recinto).trim() : 'N/A';
           const modalidad = item.acf?.modalidad ? String(item.acf.modalidad).trim() : 'Virtual';
-          const fechaText = item.acf?.fecha_texto ?? item.acf?.fecha_inicio ?? 'Próximamente'; 
+          const fechaText = item.acf?.fecha_texto ?? item.acf?.fecha_inicio ?? 'Próximamente';
           const stripColor = getCardGradients(item.id);
 
           return (
@@ -235,11 +235,11 @@ export function CoursesScreen({ navigation }: Props) {
             >
               <View style={styles.cardCover}>
                 {item.imagen && !failedImages.has(item.id) ? (
-                  <Image 
-                    source={{ 
-                      uri: String(item.imagen).trim().replace('https://', 'http://')
-                    }} 
-                    style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]} 
+                  <Image
+                    source={{
+                      uri: String(item.imagen).trim()
+                    }}
+                    style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]}
                     resizeMode="cover"
                     onError={() => setFailedImages(prev => new Set(prev).add(item.id))}
                   />
@@ -248,7 +248,7 @@ export function CoursesScreen({ navigation }: Props) {
                 )}
                 {/* Gradient for text readability */}
                 <View style={styles.gradientOverlay} />
-                
+
                 {recinto && recinto !== 'N/A' && (
                   <View style={styles.topBadge}>
                     <Text style={styles.topBadgeText}>{recinto}</Text>

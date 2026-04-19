@@ -16,7 +16,7 @@ export function CartScreen({ navigation }: Props) {
   const { items, totalSelected, toggleSelection, toggleAll, removeFromCart } = useCart();
   const { user } = useAuth();
   const isGuest = !user;
-  const exitGuestToLogin = () => {};
+  const exitGuestToLogin = () => { };
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
 
   const allSelected = items.length > 0 && items.every((i) => i.selected);
@@ -78,24 +78,24 @@ export function CartScreen({ navigation }: Props) {
                 color={item.selected ? colors.primary : colors.textMuted}
               />
             </Pressable>
-            
+
             {item.course.imagen && !failedImages.has(item.course.id) ? (
-              <Image 
-                source={{ uri: item.course.imagen.replace('https://', 'http://') }} 
-                style={styles.image} 
-                resizeMode="cover" 
+              <Image
+                source={{ uri: item.course.imagen }}
+                style={styles.image}
+                resizeMode="cover"
                 onError={() => setFailedImages(prev => new Set(prev).add(item.course.id))}
               />
             ) : (
               <View style={[styles.image, { backgroundColor: '#e2e8f0' }]} />
             )}
-            
+
             <View style={styles.info}>
               <Text style={styles.title} numberOfLines={2}>{item.course.title}</Text>
               <Text style={styles.price}>
                 RD$ {(item.course as any).price || item.course.acf?.precio_regular || '1,500'}
               </Text>
-              
+
               <View style={styles.actions}>
                 <Pressable onPress={() => removeFromCart(item.course.id)}>
                   <Text style={styles.deleteText}>Eliminar</Text>

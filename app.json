@@ -20,7 +20,9 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "edu.uapa.ucapconnect.mejoras",
-      "associatedDomains": ["applinks:ucapconnect.ing.software"],
+      "associatedDomains": [
+        "applinks:ucapconnect.ing.software"
+      ],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -38,10 +40,14 @@
           "data": [
             {
               "scheme": "https",
-              "host": "ucapconnect.ing.software"
+              "host": "ucapconnect.ing.software",
+              "pathPrefix": "/"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "edgeToEdgeEnabled": true,
@@ -52,11 +58,11 @@
       "expo-font",
       "@react-native-community/datetimepicker"
     ],
+    "owner": "djelia102",
     "extra": {
       "eas": {
-        "projectId": "14a749f4-fff6-4209-a697-759ccb1a19a1"
+        "projectId": "42c3b848-ff65-44b6-976a-d35ee0afba0f"
       }
-    },
-    "owner": "lreinoso"
+    }
   }
 }
