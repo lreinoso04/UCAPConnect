@@ -7,6 +7,7 @@ export type AuthStackParamList = {
   Register: undefined;
   ConfirmEmail: { status: 'success' | 'error' };
   ForgotPassword: undefined;
+  ResetPassword: { token: string };
 };
 
 export type HomeStackParamList = {

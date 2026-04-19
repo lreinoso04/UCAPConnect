@@ -15,6 +15,7 @@ import { LoginScreen } from '../screens/LoginScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { ConfirmEmailScreen } from '../screens/ConfirmEmailScreen';
 import { ForgotPasswordScreen } from '../screens/ForgotPasswordScreen';
+import { ResetPasswordScreen } from '../screens/ResetPasswordScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { CoursesScreen } from '../screens/CoursesScreen';
 import { CourseDetailScreen } from '../screens/CourseDetailScreen';
@@ -78,6 +79,13 @@ function AuthNavigator() {
       <AuthStack.Screen
         name="ForgotPassword"
         component={ForgotPasswordScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <AuthStack.Screen
+        name="ResetPassword"
+        component={ResetPasswordScreen}
         options={{
           headerShown: false,
         }}
@@ -180,6 +188,7 @@ export function RootNavigator() {
       screens: {
         Login: 'login',
         ConfirmEmail: 'confirm-email',
+        ResetPassword: 'reset-password',
       },
     },
   };

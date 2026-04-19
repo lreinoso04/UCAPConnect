@@ -35,3 +35,10 @@ export function forgotPassword(email: string) {
     body: { email },
   });
 }
+
+export function resetPassword(token: string, newPassword: string, confirmPassword: string) {
+  return apiRequest<{ message: string }>(`/api/v1/auth/reset-password?token=${token}`, {
+    method: 'POST',
+    body: { newPassword, confirmPassword },
+  });
+}
