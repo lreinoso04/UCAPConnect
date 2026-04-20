@@ -186,16 +186,21 @@ export function ProfileScreen() {
       }
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
-        allowsEditing: true,
+        allowsEditing: Platform.OS === 'ios', // Solo habilitar edición en iOS
         aspect: [1, 1],
         quality: 0.5,
       });
       if (!result.canceled && result.assets?.[0]?.uri) {
-        await updateUserImage(result.assets[0].uri);
-        Alert.alert('Listo', 'Foto de perfil actualizada correctamente.');
+        try {
+          await updateUserImage(result.assets[0].uri);
+          Alert.alert('Listo', 'Foto de perfil actualizada correctamente.');
+        } catch (updateError) {
+          console.error('Error al actualizar imagen:', updateError);
+          Alert.alert('Error', 'Hubo un problema al actualizar la imagen del perfil.');
+        }
       }
     } catch (e) {
-      console.error(e);
+      console.error('Error al seleccionar imagen:', e);
       Alert.alert('Error', 'Hubo un problema al seleccionar la imagen.');
     }
   }
