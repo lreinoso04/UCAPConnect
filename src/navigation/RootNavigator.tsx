@@ -183,7 +183,7 @@ export function RootNavigator() {
   const inApp = user != null;
 
   const linking = {
-    prefixes: ['ucapconnect://', 'https://ucapconnect.ing.software'],
+    prefixes: ['ucapconnect://'],
     config: {
       screens: {
         Login: 'login',

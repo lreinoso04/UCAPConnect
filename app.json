@@ -20,9 +20,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "edu.uapa.ucapconnect.mejoras",
-      "associatedDomains": [
-        "applinks:ucapconnect.ing.software"
-      ],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -33,23 +30,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0d47a1"
       },
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "ucapconnect.ing.software",
-              "pathPrefix": "/"
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
-        }
-      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
