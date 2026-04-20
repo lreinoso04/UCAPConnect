@@ -35,6 +35,7 @@ export function LoginScreen({ navigation, route }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const passwordRef = useRef<TextInput>(null);
 
   useEffect(() => {
@@ -107,18 +108,26 @@ export function LoginScreen({ navigation, route }: Props) {
           />
 
           <Text style={styles.fieldLabel}>Contraseña</Text>
-          <TextInput
-            ref={passwordRef}
-            style={styles.input}
-            placeholder="••••••••"
-            placeholderTextColor={colors.textMuted}
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-            editable={!loading}
-            returnKeyType="done"
-            onSubmitEditing={onSubmit}
-          />
+          <View style={styles.inputContainer}>
+            <TextInput
+              ref={passwordRef}
+              style={styles.inputInContainer}
+              placeholder="••••••••"
+              placeholderTextColor={colors.textMuted}
+              secureTextEntry={!passwordVisible}
+              value={password}
+              onChangeText={setPassword}
+              editable={!loading}
+              returnKeyType="done"
+              onSubmitEditing={onSubmit}
+            />
+            <Pressable
+              style={styles.eyeIcon}
+              onPress={() => setPasswordVisible(!passwordVisible)}
+            >
+              <Ionicons name={passwordVisible ? 'eye-off' : 'eye'} size={20} color={colors.textMuted} />
+            </Pressable>
+          </View>
 
           <Pressable
             style={styles.forgotWrap}
@@ -228,6 +237,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#F2F3F7',
     marginBottom: spacing.lg,
     color: colors.text,
+  },
+  inputInContainer: {
+    flex: 1,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: 14,
+    fontSize: typography.size.body,
+    color: colors.text,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    borderRadius: radius.pill,
+    backgroundColor: '#F2F3F7',
+    marginBottom: spacing.lg,
+  },
+  eyeIcon: {
+    paddingHorizontal: spacing.md,
   },
   forgotWrap: { alignSelf: 'flex-end', marginTop: -spacing.sm, marginBottom: spacing.xl },
   forgot: { fontSize: typography.size.sm, color: '#007BFF', fontWeight: typography.weight.medium },

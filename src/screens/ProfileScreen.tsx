@@ -101,6 +101,9 @@ export function ProfileScreen() {
   const [pwCurrent, setPwCurrent] = useState('');
   const [pwNew, setPwNew] = useState('');
   const [pwConfirm, setPwConfirm] = useState('');
+  const [pwCurrentVisible, setPwCurrentVisible] = useState(false);
+  const [pwNewVisible, setPwNewVisible] = useState(false);
+  const [pwConfirmVisible, setPwConfirmVisible] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState<string | null>(null);
 
@@ -461,7 +464,7 @@ export function ProfileScreen() {
             >
               <Text style={styles.label}>Nombre</Text>
               <TextInput
-                style={[styles.input, fieldErrors.nombre && styles.inputError]}
+                style={[styles.inputNormal, fieldErrors.nombre && styles.inputError]}
                 value={draft?.nombre ?? ''}
                 onChangeText={(t) => {
                   setDraft((d) => (d ? { ...d, nombre: t } : d));
@@ -474,7 +477,7 @@ export function ProfileScreen() {
 
               <Text style={styles.label}>Apellidos</Text>
               <TextInput
-                style={[styles.input, fieldErrors.apellidos && styles.inputError]}
+                style={[styles.inputNormal, fieldErrors.apellidos && styles.inputError]}
                 value={draft?.apellidos ?? ''}
                 onChangeText={(t) => {
                   setDraft((d) => (d ? { ...d, apellidos: t } : d));
@@ -487,7 +490,7 @@ export function ProfileScreen() {
 
               <Text style={styles.label}>Correo</Text>
               <TextInput
-                style={[styles.input, fieldErrors.correo && styles.inputError]}
+                style={[styles.inputNormal, fieldErrors.correo && styles.inputError]}
                 value={draft?.correo ?? ''}
                 onChangeText={(t) => {
                   setDraft((d) => (d ? { ...d, correo: t } : d));
@@ -502,7 +505,7 @@ export function ProfileScreen() {
 
               <Text style={styles.label}>Teléfono</Text>
               <TextInput
-                style={[styles.input, fieldErrors.telefono && styles.inputError]}
+                style={[styles.inputNormal, fieldErrors.telefono && styles.inputError]}
                 value={formatPhoneRdDisplay(draft?.telefono ?? '')}
                 onChangeText={(t) => {
                   const digits = normalizePhoneRd(t);
@@ -534,7 +537,7 @@ export function ProfileScreen() {
 
               <Text style={styles.label}>Dirección (opcional)</Text>
               <TextInput
-                style={[styles.input, styles.inputMultiline, fieldErrors.direccion && styles.inputError]}
+                style={[styles.inputNormal, styles.inputMultiline, fieldErrors.direccion && styles.inputError]}
                 value={draft?.direccion ?? ''}
                 onChangeText={(t) => {
                   setDraft((d) => (d ? { ...d, direccion: t } : d));
@@ -590,31 +593,55 @@ export function ProfileScreen() {
                 contentContainerStyle={styles.modalScroll}
               >
                 <Text style={styles.label}>Contraseña actual</Text>
-                <TextInput
-                  style={styles.input}
-                  value={pwCurrent}
-                  onChangeText={setPwCurrent}
-                  secureTextEntry
-                  editable={!pwLoading}
-                />
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    value={pwCurrent}
+                    onChangeText={setPwCurrent}
+                    secureTextEntry={!pwCurrentVisible}
+                    editable={!pwLoading}
+                  />
+                  <Pressable
+                    style={styles.eyeIcon}
+                    onPress={() => setPwCurrentVisible(!pwCurrentVisible)}
+                  >
+                    <Ionicons name={pwCurrentVisible ? 'eye-off' : 'eye'} size={20} color={colors.textMuted} />
+                  </Pressable>
+                </View>
 
                 <Text style={styles.label}>Nueva contraseña</Text>
-                <TextInput
-                  style={styles.input}
-                  value={pwNew}
-                  onChangeText={setPwNew}
-                  secureTextEntry
-                  editable={!pwLoading}
-                />
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    value={pwNew}
+                    onChangeText={setPwNew}
+                    secureTextEntry={!pwNewVisible}
+                    editable={!pwLoading}
+                  />
+                  <Pressable
+                    style={styles.eyeIcon}
+                    onPress={() => setPwNewVisible(!pwNewVisible)}
+                  >
+                    <Ionicons name={pwNewVisible ? 'eye-off' : 'eye'} size={20} color={colors.textMuted} />
+                  </Pressable>
+                </View>
 
                 <Text style={styles.label}>Confirmar nueva contraseña</Text>
-                <TextInput
-                  style={styles.input}
-                  value={pwConfirm}
-                  onChangeText={setPwConfirm}
-                  secureTextEntry
-                  editable={!pwLoading}
-                />
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    value={pwConfirm}
+                    onChangeText={setPwConfirm}
+                    secureTextEntry={!pwConfirmVisible}
+                    editable={!pwLoading}
+                  />
+                  <Pressable
+                    style={styles.eyeIcon}
+                    onPress={() => setPwConfirmVisible(!pwConfirmVisible)}
+                  >
+                    <Ionicons name={pwConfirmVisible ? 'eye-off' : 'eye'} size={20} color={colors.textMuted} />
+                  </Pressable>
+                </View>
 
                 {pwError ? <Text style={styles.error}>{pwError}</Text> : null}
               </ScrollView>
@@ -926,14 +953,37 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
     marginTop: spacing.sm,
   },
-  input: {
+  inputNormal: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.sm,
+    borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: 10,
+    paddingVertical: 12,
     fontSize: typography.size.body,
     backgroundColor: colors.card,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  input: {
+    flex: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    fontSize: typography.size.body,
+    backgroundColor: colors.card,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    backgroundColor: colors.card,
+  },
+  eyeIcon: {
+    paddingHorizontal: spacing.md,
   },
   error: { color: colors.error, marginTop: spacing.sm },
   buttonDisabled: { opacity: 0.7 },

@@ -26,6 +26,8 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
   const { token } = route.params;
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPasswordVisible, setNewPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit() {
@@ -79,29 +81,45 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
           </Text>
 
           <Text style={styles.fieldLabel}>Nueva Contraseña</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="••••••••"
-            placeholderTextColor={colors.textMuted}
-            secureTextEntry
-            value={newPassword}
-            onChangeText={setNewPassword}
-            editable={!loading}
-            returnKeyType="next"
-          />
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="••••••••"
+              placeholderTextColor={colors.textMuted}
+              secureTextEntry={!newPasswordVisible}
+              value={newPassword}
+              onChangeText={setNewPassword}
+              editable={!loading}
+              returnKeyType="next"
+            />
+            <Pressable
+              style={styles.eyeIcon}
+              onPress={() => setNewPasswordVisible(!newPasswordVisible)}
+            >
+              <Ionicons name={newPasswordVisible ? 'eye-off' : 'eye'} size={20} color={colors.textMuted} />
+            </Pressable>
+          </View>
 
           <Text style={styles.fieldLabel}>Confirmar Contraseña</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="••••••••"
-            placeholderTextColor={colors.textMuted}
-            secureTextEntry
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            editable={!loading}
-            returnKeyType="done"
-            onSubmitEditing={onSubmit}
-          />
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="••••••••"
+              placeholderTextColor={colors.textMuted}
+              secureTextEntry={!confirmPasswordVisible}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              editable={!loading}
+              returnKeyType="done"
+              onSubmitEditing={onSubmit}
+            />
+            <Pressable
+              style={styles.eyeIcon}
+              onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+            >
+              <Ionicons name={confirmPasswordVisible ? 'eye-off' : 'eye'} size={20} color={colors.textMuted} />
+            </Pressable>
+          </View>
 
           <Pressable
             style={[styles.primaryBtn, loading && styles.btnDisabled]}
@@ -154,15 +172,23 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   input: {
-    ...typography.body,
+    flex: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    fontSize: typography.size.body,
+    color: colors.text,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.card,
     borderColor: colors.border,
     borderWidth: 1,
     borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
     marginBottom: spacing.lg,
-    color: colors.text,
+  },
+  eyeIcon: {
+    paddingHorizontal: spacing.md,
   },
   primaryBtn: {
     backgroundColor: colors.primary,

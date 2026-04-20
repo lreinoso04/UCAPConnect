@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { BirthDatePickerField } from '../components/BirthDatePickerField';
 import { useAuth } from '../context/AuthContext';
 import { ApiException } from '../api/client';
@@ -38,6 +39,7 @@ export function RegisterScreen({ navigation }: Props) {
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<RegisterFormErrors>({});
@@ -220,18 +222,26 @@ export function RegisterScreen({ navigation }: Props) {
         {fieldErrors.username ? <Text style={styles.fieldErr}>{fieldErrors.username}</Text> : null}
 
         <Text style={styles.label}>Contraseña</Text>
-        <TextInput
-          ref={passwordRef}
-          style={[styles.input, fieldErrors.password && styles.inputErr]}
-          placeholder="Mínimo 6 caracteres"
-          placeholderTextColor={colors.textMuted}
-          secureTextEntry
-          value={password}
-          onChangeText={(t) => { setPassword(t); clearField('password'); }}
-          editable={!loading}
-          returnKeyType="done"
-          onSubmitEditing={() => void onSubmit()}
-        />
+        <View style={[styles.inputContainer, fieldErrors.password && styles.inputErr]}>
+          <TextInput
+            ref={passwordRef}
+            style={styles.inputInContainer}
+            placeholder="Mínimo 6 caracteres"
+            placeholderTextColor={colors.textMuted}
+            secureTextEntry={!passwordVisible}
+            value={password}
+            onChangeText={(t) => { setPassword(t); clearField('password'); }}
+            editable={!loading}
+            returnKeyType="done"
+            onSubmitEditing={() => void onSubmit()}
+          />
+          <Pressable
+            style={styles.eyeIcon}
+            onPress={() => setPasswordVisible(!passwordVisible)}
+          >
+            <Ionicons name={passwordVisible ? 'eye-off' : 'eye'} size={20} color={colors.textMuted} />
+          </Pressable>
+        </View>
         {fieldErrors.password ? <Text style={styles.fieldErr}>{fieldErrors.password}</Text> : null}
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -277,6 +287,25 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
     backgroundColor: colors.card,
     color: colors.text,
+  },
+  inputInContainer: {
+    flex: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    fontSize: typography.size.body,
+    color: colors.text,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    marginBottom: spacing.xs,
+    backgroundColor: colors.card,
+  },
+  eyeIcon: {
+    paddingHorizontal: spacing.md,
   },
   inputMulti: { minHeight: 72, paddingTop: 12 },
   dateField: { borderRadius: radius.md, marginBottom: spacing.xs },
