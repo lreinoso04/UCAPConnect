@@ -10,6 +10,9 @@ type Props = {
 export function WeeklyBarsChart({ data, title = 'Actividad semanal' }: Props) {
   return (
     <View style={styles.wrap}>
+      <div>
+        <h3> Hola mundo Andres Acevedo</h3>
+      </div>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.row}>
         {data.map((item, i) => {
