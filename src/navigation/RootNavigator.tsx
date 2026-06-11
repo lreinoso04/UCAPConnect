@@ -22,6 +22,8 @@ import { CourseDetailScreen } from '../screens/CourseDetailScreen';
 import { MyCoursesScreen } from '../screens/MyCoursesScreen';
 import { ScheduleScreen } from '../screens/ScheduleScreen';
 import { CartScreen } from '../screens/CartScreen';
+import { ChatButton } from '@/components/chatbot/ChatButton';
+import { ChatProvider } from '@/context/ChatContext';
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -194,8 +196,11 @@ export function RootNavigator() {
   };
 
   return (
-    <NavigationContainer theme={navTheme} linking={linking}>
-      {inApp ? <MainTabs /> : <AuthNavigator />}
-    </NavigationContainer>
+    <ChatProvider>
+      <NavigationContainer theme={navTheme} linking={linking}>
+        {inApp ? <MainTabs /> : <AuthNavigator />}
+        <ChatButton/>
+      </NavigationContainer>
+    </ChatProvider>
   );
 }
