@@ -1,82 +1,86 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
-import type { CursoResponse } from '../types/api';
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import { CartItem, Course } from '../types/product';
 
-export type CartItem = {
-  course: CursoResponse;
-  selected: boolean;
-};
-
-type CartState = {
+interface CartContextType {
   items: CartItem[];
-  cartCount: number;
-  totalSelected: number;
-  addToCart: (course: CursoResponse) => void;
-  removeFromCart: (courseId: number) => void;
-  toggleSelection: (courseId: number) => void;
-  toggleAll: (selected: boolean) => void;
+  addItem: (course: Course) => void;
+  removeItem: (courseId: string) => void;
   clearCart: () => void;
-  clearPurchased: () => void;
-};
+  totalItems: number;
+  totalPrice: number;
+  isInCart: (courseId: string) => boolean;
+}
 
-const CartContext = createContext<CartState | undefined>(undefined);
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+ const [items, setItems] = useState<CartItem[]>([
+  {
+    course: {
+      id: '1',
+      name: 'Curso de React Native',
+      description: 'Curso completo de React Native desde cero',
+      price: 49.99,
+      image_url: 'https://ucapconnect.ing.software/api/v1/images?url=https%3A%2F%2Fcap.uapa.edu.do%2Fwp-content%2Fuploads%2F2026%2F06%2FCurso-cap.jpg',
+      category: 'Mobile',
+      rating: 4.8,
+      reviews_count: 30,
+      instructor: 'Eliecer Bautista',
+      duration: '10h',
+      level: 'Intermedio',
+      students_count: 120,
+      badge_color: '#3b82f6',
+      created_at: '2026-01-01',
+    },
+    
+  },
+  {
+    course: {
+      id: '2',
+      name: 'Curso de programacion en Python',
+      description: 'Curso completo de programacion en Python desde cero',
+      price: 49.99,
+      image_url: 'https://ucapconnect.ing.software/api/v1/images?url=https%3A%2F%2Fcap.uapa.edu.do%2Fwp-content%2Fuploads%2F2026%2F06%2FCurso-cap.jpg',
+      category: 'Mobile',
+      rating: 4.8,
+      reviews_count: 30,
+      instructor: 'Eliecer Bautista',
+      duration: '10h',
+      level: 'Intermedio',
+      students_count: 120,
+      badge_color: '#3b82f6',
+      created_at: '2026-01-01',
+    },
+    
+  }
+]);
 
-  const addToCart = (course: CursoResponse) => {
-    setItems((prev) => {
-      if (prev.some((item) => item.course.id === course.id)) return prev;
-      return [...prev, { course, selected: true }];
+  const addItem = useCallback((course: Course) => {
+    setItems(prev => {
+      if (prev.some(item => item.course.id === course.id)) return prev;
+      return [...prev, { course }];
     });
-  };
+  }, []);
 
-  const removeFromCart = (courseId: number) => {
-    setItems((prev) => prev.filter((item) => item.course.id !== courseId));
-  };
+  const removeItem = useCallback((courseId: string) => {
+    setItems(prev => prev.filter(item => item.course.id !== courseId));
+  }, []);
 
-  const toggleSelection = (courseId: number) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.course.id === courseId ? { ...item, selected: !item.selected } : item
-      )
-    );
-  };
+  const clearCart = useCallback(() => setItems([]), []);
 
-  const toggleAll = (selected: boolean) => {
-    setItems((prev) => prev.map((item) => ({ ...item, selected })));
-  };
+  const totalItems = items.length;
+  const totalPrice = items.reduce((sum, item) => sum + item.course.price, 0);
+  const isInCart = useCallback((courseId: string) => items.some(item => item.course.id === courseId), [items]);
 
-  const clearCart = () => setItems([]);
-
-  const clearPurchased = () => {
-    setItems((prev) => prev.filter((item) => !item.selected));
-  };
-
-  const cartCount = items.length;
-  const totalSelected = items.filter(i => i.selected).reduce((acc, curr) => acc + (parseFloat((curr.course as any).price || curr.course.acf?.precio_regular || '0') || 0), 0);
-
-  const value = useMemo(
-    () => ({
-      items,
-      cartCount,
-      totalSelected,
-      addToCart,
-      removeFromCart,
-      toggleSelection,
-      toggleAll,
-      clearCart,
-      clearPurchased,
-    }),
-    [items, cartCount, totalSelected]
+  return (
+    <CartContext.Provider value={{ items, addItem, removeItem, clearCart, totalItems, totalPrice, isInCart }}>
+      {children}
+    </CartContext.Provider>
   );
-
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export function useCart() {
-  const ctx = useContext(CartContext);
-  if (!ctx) {
-    throw new Error('useCart debe usarse dentro de un CartProvider');
-  }
-  return ctx;
+  const context = useContext(CartContext);
+  if (!context) throw new Error('useCart must be used within CartProvider');
+  return context;
 }

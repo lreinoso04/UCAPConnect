@@ -26,6 +26,8 @@ import { CartScreen } from '../screens/CartScreen';
 import { ChatProvider } from '@/context/ChatContext';
 import { ChatButton } from '@/components/chatbot/ChatButton';
 import { ChatWindow } from '@/components/chatbot/ChatWindow';
+import { CartProvider } from '@/context/CartContext';
+import { Text } from 'react-native';
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -127,9 +129,21 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: route.name === 'CartTab',
-        headerStyle: { backgroundColor: colors.primary },
+        headerStyle: { backgroundColor: colors.primary, height: 125 },
+        headerTitleAlign: 'left',
         headerTintColor: colors.onPrimary,
-        headerTitleStyle: { fontWeight: typography.weight.semibold },
+        headerTitleStyle: { fontWeight: typography.weight.semibold},
+        headerTitle: () => (
+          <View>
+            <Text style={{ color: colors.onPrimary, fontSize: 23, fontWeight: '700' }}>
+              Carrito
+            </Text>
+
+            <Text style={{ color: colors.onPrimary, fontSize: 13, opacity: 0.8, paddingTop:2 }}>
+              Revisa tus cursos seleccionados
+            </Text>
+          </View>
+        ),
         tabBarActiveTintColor: colors.heroNavy,
         tabBarInactiveTintColor: '#475569',
         tabBarStyle: {
@@ -218,15 +232,18 @@ export function RootNavigator() {
     },
   };
   return (
-    <ChatProvider>
-      <View style={{ flex: 1 }}>
-        <NavigationContainer theme={navTheme} linking={linking}>
-          {inApp ? <MainTabs /> : <AuthNavigator />}
-        </NavigationContainer>
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'box-none' }}>
-          <ChatContent />
+    <CartProvider>
+      <ChatProvider>
+        <View style={{ flex: 1 }}>
+          <NavigationContainer theme={navTheme} linking={linking}>
+            {inApp ? <MainTabs /> : <AuthNavigator />}
+          </NavigationContainer>
+
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'box-none' }}>
+            <ChatContent />
+          </View>
         </View>
-      </View>
-    </ChatProvider>
+      </ChatProvider>
+    </CartProvider>
   );
 }

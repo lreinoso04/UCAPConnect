@@ -1,148 +1,241 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, Alert } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { ShoppingCart, Trash2, ArrowRight, GraduationCap } from 'lucide-react-native';
+import { Colors } from '../colors';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import type { HomeStackParamList } from '../navigation/types';
-import { colors, layout, radius, spacing, typography } from '../theme';
+import { CartItemCard } from '../components/cart/CartItemCard';
 
-type Props = any; // Bypass TS mismatch temporarily for CartTab vs CartStack
+export function CartScreen() {
+  const { items, totalItems, totalPrice, clearCart } = useCart();
+  console.log('CART ITEMS:', items);
 
-export function CartScreen({ navigation }: Props) {
-  const insets = useSafeAreaInsets();
-  const { items, totalSelected, toggleSelection, toggleAll, removeFromCart } = useCart();
-  const { user } = useAuth();
-  const isGuest = !user;
-  const exitGuestToLogin = () => { };
-  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
-
-  const allSelected = items.length > 0 && items.every((i) => i.selected);
-
-  const handleCheckout = () => {
-    if (items.filter((i) => i.selected).length === 0) {
-      Alert.alert('Carrito vacío', 'Debes seleccionar al menos un curso para pagar.');
-      return;
-    }
-    if (isGuest) {
-      Alert.alert(
-        'Inicia sesión',
-        'Debes crear una cuenta o iniciar sesión para poder adquirir estos programas.',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Ir a Login', onPress: () => exitGuestToLogin() },
-        ]
-      );
-    } else {
-      Alert.alert('Mockup de Pago', `Procediendo a pagar RD$ ${totalSelected.toFixed(2)}`);
-    }
+  const handleClearCart = () => {
+    Alert.alert('Vaciar carrito', '¿Eliminar todos los cursos del carrito?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Vaciar', style: 'destructive', onPress: clearCart },
+    ]);
   };
 
+  const handleCheckout = () => {
+    Alert.alert(
+      'Inscribirse',
+      `Total: $${totalPrice.toFixed(2)}`
+    );
+  };
+
+  if (items.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <View style={styles.emptyIconWrap}>
+          <GraduationCap size={56} color={Colors.neutral[300]} strokeWidth={1.5} />
+        </View>
+        <Text style={styles.emptyTitle}>Tu carrito está vacío</Text>
+        <Text style={styles.emptySubtitle}>Explora el catálogo para inscribirte en cursos</Text>
+        <TouchableOpacity style={styles.browseButton} activeOpacity={0.8}>
+          <Text style={styles.browseButtonText}>Ver catálogo</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.subtitle}>{totalItems} {totalItems === 1 ? 'curso' : 'cursos'}</Text>
+        </View>
+        <TouchableOpacity style={styles.clearButton} onPress={handleClearCart} activeOpacity={0.7}>
+          <Trash2 size={18} color={Colors.error[500]} strokeWidth={2} />
+          <Text style={styles.clearText}>Vaciar</Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
         data={items}
-        keyExtractor={(item) => item.course.id.toString()}
-        contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 120 }]}
-        ListEmptyComponent={
-          <View style={styles.emptyWrap}>
-            <Ionicons name="cart-outline" size={64} color={colors.border} />
-            <Text style={styles.emptyText}>Tu carrito está vacío</Text>
-            <Pressable style={styles.exploreBtn} onPress={() => navigation.navigate('CoursesList')}>
-              <Text style={styles.exploreBtnText}>Explorar Programas</Text>
-            </Pressable>
-          </View>
-        }
-        ListHeaderComponent={
-          items.length > 0 ? (
-            <View style={styles.header}>
-              <Pressable style={styles.selectAllRow} onPress={() => toggleAll(!allSelected)}>
-                <Ionicons
-                  name={allSelected ? 'checkbox' : 'square-outline'}
-                  size={24}
-                  color={allSelected ? colors.primary : colors.textMuted}
-                />
-                <Text style={styles.selectAllText}>Seleccionar todos los artículos</Text>
-              </Pressable>
-            </View>
-          ) : null
-        }
-        renderItem={({ item }) => (
-          <View style={styles.cartItem}>
-            <Pressable style={styles.checkboxWrap} onPress={() => toggleSelection(item.course.id)}>
-              <Ionicons
-                name={item.selected ? 'checkbox' : 'square-outline'}
-                size={24}
-                color={item.selected ? colors.primary : colors.textMuted}
-              />
-            </Pressable>
-
-            {item.course.imagen && !failedImages.has(item.course.id) ? (
-              <Image
-                source={{ uri: item.course.imagen }}
-                style={styles.image}
-                resizeMode="cover"
-                onError={() => setFailedImages(prev => new Set(prev).add(item.course.id))}
-              />
-            ) : (
-              <View style={[styles.image, { backgroundColor: '#e2e8f0' }]} />
-            )}
-
-            <View style={styles.info}>
-              <Text style={styles.title} numberOfLines={2}>{item.course.title}</Text>
-              <Text style={styles.price}>
-                RD$ {(item.course as any).price || item.course.acf?.precio_regular || '1,500'}
-              </Text>
-
-              <View style={styles.actions}>
-                <Pressable onPress={() => removeFromCart(item.course.id)}>
-                  <Text style={styles.deleteText}>Eliminar</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        )}
+        keyExtractor={item => item.course.id}
+        contentContainerStyle={[
+          styles.list,
+          items.length === 0 && { flexGrow: 1 }
+        ]}
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => <CartItemCard item={item} />}
       />
 
-      {items.length > 0 && (
-        <View style={[styles.footer, { paddingBottom: insets.bottom || spacing.md }]}>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Subtotal ({items.filter(i => i.selected).length} prods):</Text>
-            <Text style={styles.totalValue}>RD$ {totalSelected.toFixed(2)}</Text>
+      <View style={styles.footer}>
+        <View style={styles.summary}>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Subtotal</Text>
+            <Text style={styles.summaryValue}>${totalPrice.toFixed(2)}</Text>
           </View>
-          <Pressable style={styles.checkoutBtn} onPress={handleCheckout}>
-            <Text style={styles.checkoutBtnText}>Proceder al Pago</Text>
-          </Pressable>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Descuento</Text>
+            <Text style={styles.summaryValueFree}>-$0.00</Text>
+          </View>
+          <View style={[styles.summaryRow, styles.totalRow]}>
+            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalValue}>${totalPrice.toFixed(2)}</Text>
+          </View>
         </View>
-      )}
+        <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout} activeOpacity={0.8}>
+          <Text style={styles.checkoutText}>Inscribirme</Text>
+          <ArrowRight size={20} color={Colors.white} strokeWidth={2} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.surface },
-  list: { padding: spacing.md },
-  header: { marginBottom: spacing.md, paddingBottom: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
-  selectAllRow: { flexDirection: 'row', alignItems: 'center' },
-  selectAllText: { marginLeft: spacing.sm, fontSize: typography.size.md, color: colors.text, fontWeight: typography.weight.medium },
-  cartItem: { flexDirection: 'row', backgroundColor: colors.card, padding: spacing.sm, borderRadius: radius.md, marginBottom: spacing.md, borderWidth: 1, borderColor: colors.border },
-  checkboxWrap: { justifyContent: 'center', paddingRight: spacing.sm },
-  image: { width: 80, height: 80, borderRadius: radius.sm, marginRight: spacing.md },
-  info: { flex: 1, justifyContent: 'space-between' },
-  title: { fontSize: typography.size.md, color: colors.text, fontWeight: typography.weight.semibold },
-  price: { fontSize: typography.size.lg, color: colors.primary, fontWeight: typography.weight.bold, marginTop: 4 },
-  actions: { flexDirection: 'row', marginTop: spacing.sm },
-  deleteText: { color: colors.error, fontSize: typography.size.sm, fontWeight: typography.weight.medium },
-  emptyWrap: { alignItems: 'center', marginTop: 100 },
-  emptyText: { marginTop: spacing.md, fontSize: typography.size.lg, color: colors.textMuted },
-  exploreBtn: { marginTop: spacing.xl, backgroundColor: colors.primary, paddingHorizontal: spacing.xxl, paddingVertical: spacing.md, borderRadius: radius.pill },
-  exploreBtnText: { color: colors.onPrimary, fontWeight: typography.weight.bold },
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: colors.card, padding: spacing.lg, borderTopWidth: 1, borderTopColor: colors.border, elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.1, shadowRadius: 4 },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.md, alignItems: 'flex-end' },
-  totalLabel: { fontSize: typography.size.md, color: colors.text },
-  totalValue: { fontSize: 20, fontWeight: typography.weight.bold, color: colors.primary },
-  checkoutBtn: { backgroundColor: '#FF8300', paddingVertical: 16, borderRadius: radius.pill, alignItems: 'center' },
-  checkoutBtnText: { color: '#FFF', fontSize: typography.size.md, fontWeight: typography.weight.bold },
+  root: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+    title: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 28,
+    color: Colors.neutral[900],
+    lineHeight: 34,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+  },
+  subtitle: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 16,
+    color: Colors.neutral[400],
+    marginTop: 10,
+  },
+  clearButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: Colors.error[500] + '10',
+    marginTop: 4,
+  },
+  clearText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 13,
+    color: Colors.error[500],
+  },
+  list: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  footer: {
+    backgroundColor: Colors.white,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  summary: {
+    gap: 8,
+    marginBottom: 16,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  summaryLabel: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 14,
+    color: Colors.neutral[500],
+  },
+  summaryValue: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: Colors.neutral[700],
+  },
+  summaryValueFree: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: Colors.success[500],
+  },
+  totalRow: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.neutral[200],
+    paddingTop: 10,
+    marginTop: 4,
+  },
+  totalLabel: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 16,
+    color: Colors.neutral[900],
+  },
+  totalValue: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 20,
+    color: Colors.primary[600],
+  },
+  checkoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.primary[600],
+    borderRadius: 14,
+    paddingVertical: 16,
+    shadowColor: Colors.primary[600],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  checkoutText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 16,
+    color: Colors.white,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    gap: 8,
+    paddingHorizontal: 40,
+  },
+  emptyIconWrap: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.neutral[100],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  emptyTitle: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 20,
+    color: Colors.neutral[800],
+  },
+  emptySubtitle: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 14,
+    color: Colors.neutral[400],
+    marginBottom: 16,
+  },
+  browseButton: {
+    backgroundColor: Colors.primary[600],
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  browseButtonText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 14,
+    color: Colors.white,
+  },
 });

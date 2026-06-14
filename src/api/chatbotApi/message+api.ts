@@ -53,6 +53,7 @@ export async function POST(request: Request) {
 
     const response: ChatbotResponse = {
       response: findBestResponse(body.message),
+      success: false
     };
 
     return new Response(JSON.stringify(response), {
