@@ -21,7 +21,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const generateId = () => `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim() || isLoading) return;
+    
+    if (!content.trim() || isLoading) {
+      return;
+    }
 
     const userMessage: ChatMessage = {
       id: generateId(),
@@ -62,7 +65,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading]);
+  }, []);
 
   const openChat = useCallback(() => {
     setIsOpen(true);

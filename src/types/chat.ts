@@ -14,6 +14,7 @@ export interface ChatState {
 }
 
 export interface ChatbotResponse {
+  success: boolean;
   response: string;
 }
 

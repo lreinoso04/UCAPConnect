@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config';
 import { ChatbotRequest, ChatbotResponse } from '@/types/chat';
 
 const API_TIMEOUT = 30000;
@@ -23,9 +24,11 @@ class ChatbotService {
   }
 
   async sendMessage(message: string): Promise<string> {
-    const endpoint = '/api/chatbot/message';
+    const endpoint = `${API_BASE_URL}/api/v1/chatbot/message`;
+    console.log('[ChatbotService] sendMessage called:', { endpoint, message });
 
     try {
+      console.log('[ChatbotService] Haciendo POST request...');
       const response = await this.fetchWithTimeout(endpoint, {
         method: 'POST',
         headers: {
@@ -33,6 +36,8 @@ class ChatbotService {
         },
         body: JSON.stringify({ message } as ChatbotRequest),
       });
+
+      console.log('[ChatbotService] Respuesta recibida:', { status: response.status, ok: response.ok });
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -45,8 +50,16 @@ class ChatbotService {
       }
 
       const data: ChatbotResponse = await response.json();
+      console.log('[ChatbotService] Data parseada:', data);
+      
+      if (!data.success) {
+        throw new Error(data.response || 'Error en la respuesta del chatbot');
+      }
+      
+      console.log('[ChatbotService] Retornando respuesta:', data.response);
       return data.response;
     } catch (error) {
+      console.error('[ChatbotService] Error capturado:', error);
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           throw new Error('La solicitud tardó demasiado. Verifica tu conexión.');

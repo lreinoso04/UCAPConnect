@@ -1,61 +1,116 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { ChatMessage } from '@/types/chat';
-import Ionicons from '@expo/vector-icons/build/Ionicons';
-// import { User, Bot } from 'lucide-react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const IS_SMALL_SCREEN = SCREEN_WIDTH < 375;
+
+interface Message {
+  id: string;
+  content: string;
+  sender: 'user' | 'assistant';
+  timestamp: Date;
+  error?: boolean;
+}
 
 interface MessageBubbleProps {
-  message: ChatMessage;
+  message: Message;
+}
+
+function formatTime(date: Date): string {
+  return new Date(date).toLocaleTimeString('es-DO', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.sender === 'user';
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(isUser ? 30 : -30)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 8,
+        tension: 60,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [isUser]);
 
   return (
-    <View style={[styles.container, isUser ? styles.userContainer : styles.assistantContainer]}>
-      <View style={styles.messageRow}>
-        {!isUser && (
-          <View style={styles.avatar}>
-           <Ionicons name="person" size={18} color="#fff" />
-          </View>
-        )}
+    <Animated.View
+      style={[
+        styles.container,
+        isUser ? styles.userContainer : styles.assistantContainer,
+        {
+          opacity: fadeAnim,
+          transform: [{ translateX: slideAnim }],
+        },
+      ]}
+    >
+      <View style={[styles.messageRow, isUser && styles.messageRowReverse]}>
+        {/* Avatar */}
         <View
           style={[
-            styles.bubble,
-            isUser ? styles.userBubble : styles.assistantBubble,
-            message.error && styles.errorBubble,
+            styles.avatar,
+            isUser ? styles.userAvatar : styles.assistantAvatar,
           ]}
         >
-          <Text
+          <Ionicons
+            name={isUser ? 'person' : 'sparkles'}
+            size={16}
+            color="#FFFFFF"
+          />
+        </View>
+
+        {/* Bubble */}
+        <View style={styles.bubbleWrapper}>
+          <View
             style={[
-              styles.messageText,
-              isUser ? styles.userText : styles.assistantText,
-              message.error && styles.errorText,
+              styles.bubble,
+              isUser ? styles.userBubble : styles.assistantBubble,
+              message.error && styles.errorBubble,
             ]}
           >
-            {message.content}
+            <Text
+              style={[
+                styles.messageText,
+                isUser ? styles.userText : styles.assistantText,
+                message.error && styles.errorText,
+              ]}
+            >
+              {message.content}
+            </Text>
+          </View>
+
+          {/* Timestamp */}
+          <Text
+            style={[
+              styles.timestamp,
+              isUser ? styles.userTimestamp : styles.assistantTimestamp,
+            ]}
+          >
+            {formatTime(message.timestamp)}
           </Text>
         </View>
-        {isUser && (
-          <View style={[styles.avatar, styles.userAvatar]}>
-            <Ionicons name="person" size={18} color="#fff" />
-          </View>
-        )}
       </View>
-      <Text style={[styles.timestamp, isUser ? styles.userTimestamp : styles.assistantTimestamp]}>
-        {formatTime(message.timestamp)}
-      </Text>
-    </View>
+    </Animated.View>
   );
-}
-
-function formatTime(date: Date): string {
-  return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 4,
-    maxWidth: '85%',
+    marginVertical: 6,
+    maxWidth: '90%',
+    minHeight: 50,
   },
   userContainer: {
     alignSelf: 'flex-end',
@@ -66,32 +121,52 @@ const styles = StyleSheet.create({
   messageRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 8,
+    gap: 10,
+  },
+  messageRowReverse: {
+    flexDirection: 'row-reverse',
   },
   avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FF8300',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   userAvatar: {
-    backgroundColor: '#FF8300',
+    backgroundColor: '#F97316',
+  },
+  assistantAvatar: {
+    backgroundColor: '#6B7280',
+  },
+  bubbleWrapper: {
+    maxWidth: SCREEN_WIDTH * 0.7,
+    gap: 4,
   },
   bubble: {
-    borderRadius: 18,
+    borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    maxWidth: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
   },
   userBubble: {
-    backgroundColor: '#FF8300',
-    borderBottomRightRadius: 4,
+    backgroundColor: '#F97316',
+    borderBottomRightRadius: 6,
   },
   assistantBubble: {
-    backgroundColor: '#F3F4F6',
-    borderBottomLeftRadius: 4,
+    backgroundColor: '#FFFFFF',
+    borderBottomLeftRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   errorBubble: {
     backgroundColor: '#FEF2F2',
@@ -99,11 +174,12 @@ const styles = StyleSheet.create({
     borderColor: '#FEE2E2',
   },
   messageText: {
-    fontSize: 15,
+    fontSize: IS_SMALL_SCREEN ? 14 : 15,
     lineHeight: 22,
   },
   userText: {
     color: '#FFFFFF',
+    fontWeight: '500',
   },
   assistantText: {
     color: '#1F2937',
@@ -113,17 +189,13 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     fontSize: 11,
-    marginTop: 4,
-    opacity: 0.6,
+    color: '#9CA3AF',
+    paddingHorizontal: 4,
   },
   userTimestamp: {
     textAlign: 'right',
-    marginRight: 40,
-    color: '#6B7280',
   },
   assistantTimestamp: {
     textAlign: 'left',
-    marginLeft: 40,
-    color: '#6B7280',
   },
 });

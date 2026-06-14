@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,188 +9,357 @@ import {
   Platform,
   ScrollView,
   Keyboard,
+  Animated,
+  Dimensions,
 } from 'react-native';
-import {Ionicons} from '@expo/vector-icons';
-import { useState, useEffect, useRef } from 'react';
-import { useChat } from '@/context/ChatContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { MessageBubble } from './MessageBubble';
 import { TypingIndicator } from './TypingIndicator';
-import {colors} from '@/theme';
 
-interface ChatWindowProps {
-  onClose: () => void;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const IS_SMALL_SCREEN = SCREEN_WIDTH < 375;
+const IS_IOS = Platform.OS === 'ios';
+
+interface Message {
+  id: string;
+  content: string;
+  sender: 'user' | 'assistant';
+  timestamp: Date;
+  error?: boolean;
 }
 
-export function ChatWindow({ onClose }: ChatWindowProps) {
-  const { messages, isLoading, sendMessage } = useChat();
+interface ChatWindowProps {
+  visible?: boolean;
+  messages: Message[];
+  isLoading: boolean;
+  onClose: () => void;
+  onSendMessage: (message: string) => void;
+}
+
+export function ChatWindow({
+  visible = true,
+  messages,
+  isLoading,
+  onClose,
+  onSendMessage,
+}: ChatWindowProps) {
   const [inputText, setInputText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
+  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [shouldRender, setShouldRender] = useState(visible);
 
-  useEffect(() => {
+ useEffect(() => {
+  if (visible) {
+    setShouldRender(true);
+
+    Animated.parallel([
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 9,
+        tension: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  } else {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: SCREEN_HEIGHT,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShouldRender(false);
+    });
+  }
+}, [visible]);
+
+useEffect(() => {
+  const showSub = Keyboard.addListener('keyboardDidShow', () => {
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 200);
+  });
+
+  return () => {
+    showSub.remove();
+  };
+}, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 100);
+    return () => clearTimeout(timer);
   }, [messages, isLoading]);
 
   const handleSend = async () => {
-    if (!inputText.trim() || isLoading) return;
+    if (!inputText.trim() || isLoading) {
+      return;
+    }
 
     const message = inputText.trim();
     setInputText('');
     Keyboard.dismiss();
-    await sendMessage(message);
-  };
-
-  const handleKeyPress = (e: any) => {
-    if (e.nativeEvent.key === 'Enter' && !e.nativeEvent.shiftKey) {
-      e.preventDefault();
-      handleSend();
+    
+    try {
+      await onSendMessage(message);
+    } catch (error) {
     }
   };
 
-  const handleMinimize = () => {
-    Keyboard.dismiss();
-    onClose();
+  const handleSubmit = async () => {
+    await handleSend();
   };
 
+  const quickActions = [
+    { id: '1', label: 'Cursos', icon: 'book-outline' },
+    { id: '2', label: 'Inscripciones', icon: 'document-text-outline' },
+    { id: '3', label: 'Certificados', icon: 'ribbon-outline' },
+    { id: '4', label: 'Horarios', icon: 'time-outline' },
+  ];
+
+ if (!shouldRender) return null;
+
   return (
-    <View style={styles.overlay}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <View style={styles.botIcon}>
-              <Text style={styles.iconText}>💬</Text>
-            </View>
-            <View style={styles.headerText}>
-              <Text style={styles.headerTitle}>Asistente Virtual</Text>
-              <Text style={styles.headerSubtitle}>Online - Listo para ayudarte</Text>
-            </View>
-          </View>
-          <TouchableOpacity style={styles.closeButton} onPress={handleMinimize} activeOpacity={0.7}>
-            <Text style={styles.iconText}>✕</Text>
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.messagesContainer}
-          contentContainerStyle={styles.messagesContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          {messages.length === 0 ? (
-            <View style={styles.emptyState}>
-              <View style={styles.emptyIcon}>
-                <Text style={styles.emptyIconText}>💬</Text>
-              </View>
-              <Text style={styles.emptyTitle}>Bienvenido</Text>
-              <Text style={styles.emptySubtitle}>
-                Escribe un mensaje para comenzar la conversacion
-              </Text>
-            </View>
-          ) : (
-            <>
-              {messages.map(message => (
-                <MessageBubble key={message.id} message={message} />
-              ))}
-              {isLoading && <TypingIndicator />}
-            </>
-          )}
-        </ScrollView>
-
+    <Animated.View
+      style={[
+        styles.overlay,
+        {
+          opacity: fadeAnim,
+        },
+      ]}
+    >
+      <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+          style={styles.container}
+          behavior={IS_IOS ? 'padding' : 'height'}
+          keyboardVerticalOffset={IS_IOS ? 0 : 20}
         >
-          <View style={styles.inputContainer}>
-            <TextInput
-              ref={inputRef}
-              style={styles.input}
-              placeholder="Escribe tu mensaje..."
-              placeholderTextColor="#9CA3AF"
-              value={inputText}
-              onChangeText={setInputText}
-              multiline
-              maxLength={500}
-              editable={!isLoading}
-              onKeyPress={handleKeyPress}
-            />
-            <TouchableOpacity
-              style={[
-                styles.sendButton,
-                (!inputText.trim() || isLoading) && styles.sendButtonDisabled,
-              ]}
-              onPress={handleSend}
-              disabled={!inputText.trim() || isLoading}
-              activeOpacity={0.7}
+          <Animated.View
+            style={[
+              styles.windowContainer,
+              {
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            {/* Header */}
+            <View style={styles.header}>
+              <View style={styles.headerTop}>
+                <View style={styles.headerLeft}>
+                  <View style={styles.botIcon}>
+                    <Ionicons name="chatbubble-ellipses" size={24} color="#FFFFFF" />
+                  </View>
+                  <View style={styles.headerInfo}>
+                    <Text style={styles.headerTitle}>UCAPBOT</Text>
+                    <View style={styles.statusRow}>
+                      <View style={styles.statusDot} />
+                      <Text style={styles.headerSubtitle}>Online - Listo para ayudarte</Text>
+                    </View>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={onClose}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons name="close" size={24} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Messages */}
+            <ScrollView
+              ref={scrollViewRef}
+              style={styles.messagesContainer}
+              contentContainerStyle={styles.messagesContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces={true}
+              overScrollMode="never"
             >
-              <Ionicons name="paper-plane-outline" size={22} color="#fff" />
-            </TouchableOpacity>
-          </View>
+              {messages.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <View style={styles.emptyIcon}>
+                    <Ionicons name="sparkles" size={40} color="#F97316" />
+                  </View>
+                  <Text style={styles.emptyTitle}>Bienvenido!</Text>
+                  <Text style={styles.emptySubtitle}>
+                    Soy tu asistente virtual. Selecciona una opcion o escribe tu consulta.
+                  </Text>
+
+                  {/* Quick actions */}
+                  <View style={styles.quickActionsContainer}>
+                    {quickActions.map((action) => (
+                      <TouchableOpacity
+                        key={action.id}
+                        style={styles.quickAction}
+                        onPress={() => {
+                          onSendMessage(action.label);
+                        }}
+                        activeOpacity={0.8}
+                      >
+                        <Ionicons name={action.icon as any} size={18} color="#001B5E" />
+                        <Text style={styles.quickActionText}>{action.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              ) : (
+                <>
+                  {messages.map((message) => (
+                    <MessageBubble key={message.id} message={message} />
+                  ))}
+                  {isLoading && <TypingIndicator />}
+                </>
+              )}
+            </ScrollView>
+
+            {/* Input area */}
+            <View style={styles.inputContainer}>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  ref={inputRef}
+                  style={styles.input}
+                  placeholder="Escribe tu mensaje..."
+                  placeholderTextColor="#9CA3AF"
+                  value={inputText}
+                  onChangeText={setInputText}
+                  multiline
+                  maxLength={500}
+                  editable={!isLoading}
+                  onSubmitEditing={handleSubmit}
+                  returnKeyType="send"
+                  blurOnSubmit={false}
+                />
+                <Text style={styles.charCounter}>{inputText.length}/500</Text>
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  styles.sendButton,
+                  (!inputText.trim() || isLoading) && styles.sendButtonDisabled,
+                ]}
+                onPress={handleSend}
+                disabled={!inputText.trim() || isLoading}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name="send"
+                  size={22}
+                  color={inputText.trim() && !isLoading ? '#FFFFFF' : '#9CA3AF'}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.footerText}>Disponible las 24 horas</Text>
+          </Animated.View>
         </KeyboardAvoidingView>
-      </View>
-    </View>
+      </SafeAreaView>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   overlay: {
     position: 'absolute',
-    bottom: 80,
-    right: 16,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     zIndex: 1000,
-    elevation: 5,
+  },
+  safeArea: {
+    flex: 1,
   },
   container: {
-    width: 360,
-    height: 520,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  windowContainer: {
+    height: '80%',
+    maxHeight: 650,
+  minHeight: 500,
+    backgroundColor: '#FAFAFA',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: -8 },
     shadowOpacity: 0.25,
-    shadowRadius: 16,
+    shadowRadius: 24,
+    elevation: 24,
   },
   header: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#001B5E',
+    paddingTop: IS_IOS ? 16 : 14,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingBottom: 14,
+  },
+  headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerContent: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
   },
   botIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
-  headerText: {
-    gap: 2,
+  headerInfo: {
+    gap: 4,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: IS_SMALL_SCREEN ? 18 : 20,
+    fontWeight: '700',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
   },
   headerSubtitle: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: IS_SMALL_SCREEN ? 12 : 13,
+    color: 'rgba(255, 255, 255, 0.8)',
   },
   closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.accent,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -198,79 +368,125 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
   },
   messagesContent: {
-    paddingVertical: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     flexGrow: 1,
   },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 48,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
   },
   emptyIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#ECFDF5',
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: '#FFF7ED',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#FFEDD5',
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 24,
+    fontWeight: '700',
     color: '#1F2937',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   emptySubtitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#6B7280',
     textAlign: 'center',
-    paddingHorizontal: 24,
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  quickActionsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  quickAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  quickActionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#001B5E',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
-    gap: 8,
+    gap: 10,
+  },
+  inputWrapper: {
+    flex: 1,
+    position: 'relative',
   },
   input: {
-    flex: 1,
     backgroundColor: '#F3F4F6',
     borderRadius: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    paddingRight: 60,
     fontSize: 15,
-    maxHeight: 100,
     color: '#1F2937',
+    maxHeight: 100,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  charCounter: {
+    position: 'absolute',
+    right: 14,
+    top: '50%',
+    transform: [{ translateY: -8 }],
+    fontSize: 11,
+    color: '#9CA3AF',
   },
   sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.primary,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#001B5E',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#001B5E',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
   sendButtonDisabled: {
-    backgroundColor: colors.accent,
+    backgroundColor: '#E5E7EB',
+    shadowOpacity: 0,
+    elevation: 0,
   },
-  iconText: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: colors.textOnDark,
-    
-  },
-  emptyIconText: {
-    fontSize: 40,
-    fontWeight: '600',
-  },
-  sendIconText: {
-    fontSize: 20,
-    fontWeight: '600',
+  footerText: {
+    textAlign: 'center',
+    fontSize: 11,
+    color: '#9CA3AF',
+    paddingVertical: 8,
+    backgroundColor: '#FFFFFF',
   },
 });
