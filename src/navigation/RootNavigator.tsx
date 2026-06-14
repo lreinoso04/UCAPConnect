@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -6,6 +6,7 @@ import { ActivityIndicator, StyleSheet, View, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as SplashScreen from 'expo-splash-screen';
 import { useAuth } from '../context/AuthContext';
+import { useChat } from '../context/ChatContext';
 import { getTabLabels, resolveSegment } from '../roles/segmentConfig';
 import { colors, typography } from '../theme';
 import type { AuthStackParamList, MainTabParamList } from './types';
@@ -22,6 +23,9 @@ import { CourseDetailScreen } from '../screens/CourseDetailScreen';
 import { MyCoursesScreen } from '../screens/MyCoursesScreen';
 import { ScheduleScreen } from '../screens/ScheduleScreen';
 import { CartScreen } from '../screens/CartScreen';
+import { ChatProvider } from '@/context/ChatContext';
+import { ChatButton } from '@/components/chatbot/ChatButton';
+import { ChatWindow } from '@/components/chatbot/ChatWindow';
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -91,6 +95,27 @@ function AuthNavigator() {
         }}
       />
     </AuthStack.Navigator>
+  );
+}
+
+function ChatContent() {
+  const { isOpen, toggleChat, messages, isLoading, sendMessage } = useChat();
+
+  return (
+    <>
+      <ChatButton
+        isOpen={isOpen}
+        onToggle={toggleChat}
+        isLoading={isLoading}
+      />
+      <ChatWindow
+        visible={isOpen}
+        messages={messages}
+        isLoading={isLoading}
+        onClose={toggleChat}
+        onSendMessage={sendMessage}
+      />
+    </>
   );
 }
 
@@ -192,10 +217,16 @@ export function RootNavigator() {
       },
     },
   };
-
   return (
-    <NavigationContainer theme={navTheme} linking={linking}>
-      {inApp ? <MainTabs /> : <AuthNavigator />}
-    </NavigationContainer>
+    <ChatProvider>
+      <View style={{ flex: 1 }}>
+        <NavigationContainer theme={navTheme} linking={linking}>
+          {inApp ? <MainTabs /> : <AuthNavigator />}
+        </NavigationContainer>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'box-none' }}>
+          <ChatContent />
+        </View>
+      </View>
+    </ChatProvider>
   );
 }

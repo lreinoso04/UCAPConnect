@@ -1,3 +1,3 @@
 /** Base URL del API Spring Boot (sin barra final). */
 export const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, '') ?? 'https://ucapconnect.ing.software';
+  process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, '') ?? 'http://10.0.0.11:3003';
