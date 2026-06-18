@@ -17,12 +17,15 @@ export type HomeStackParamList = {
   CourseEnrollment: { course: CursoResponse };
   Cart: undefined;
   Notifications: undefined;
+  ScheduleTab: undefined;
+  Catalog: undefined;
+  CatalogDetails: { id: string }; 
 };
 
 export type MainTabParamList = {
   HomeTab: undefined;
   MyCoursesTab: undefined;
-  ScheduleTab: undefined;
+  CatalogTab: undefined;
   CartTab: undefined;
   ProfileTab: undefined;
 };

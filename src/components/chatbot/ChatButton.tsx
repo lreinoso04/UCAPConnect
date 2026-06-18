@@ -194,11 +194,7 @@ export function ChatButton({
             right: 20,
           }}
         >
-          <Animated.View
-            style={{
-              transform: [{ rotate: iconRotation }],
-            }}
-          >
+          <Animated.View>
             <Text style={styles.icon}>
               {isOpen ? '✕' : '💬'}
             </Text>

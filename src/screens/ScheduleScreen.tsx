@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { upcomingEvents } from '../data/dashboardMock';
 import { colors, layout, radius, spacing, typography } from '../theme';
 
@@ -17,7 +16,6 @@ const daysOfWeek = [
 
 export function ScheduleScreen() {
   const insets = useSafeAreaInsets();
-
   return (
     <View style={styles.screen}>
       <View style={[styles.hero, { paddingTop: insets.top + spacing.lg }]}>

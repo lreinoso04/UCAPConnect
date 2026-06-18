@@ -13,8 +13,6 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchCourses } from '../api/courses';
 import { useAuth } from '../context/AuthContext';
@@ -61,7 +59,6 @@ export function CoursesScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const isGuest = !user;
-  const { cartCount } = useCart();
   const [list, setList] = useState<CursoResponse[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -162,23 +159,6 @@ export function CoursesScreen({ navigation }: Props) {
                 <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: 'bold' }}>Acceder</Text>
               </Pressable>
             )}
-            <Pressable style={styles.cartBtn} onPress={() => {
-              if (isGuest) {
-                Alert.alert('Registro requerido', 'Debes iniciar sesión para usar el carrito.', [
-                  { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Entrar', onPress: () => navigation.navigate('Login' as any) }
-                ]);
-              } else {
-                navigation.navigate('Cart');
-              }
-            }}>
-              <Ionicons name="cart-outline" size={28} color="#041147" />
-              {cartCount > 0 && (
-                <View style={styles.badgeCount}>
-                  <Text style={styles.badgeCountTxt}>{cartCount}</Text>
-                </View>
-              )}
-            </Pressable>
           </View>
         </View>
         <TextInput

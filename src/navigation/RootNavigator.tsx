@@ -21,7 +21,7 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { CoursesScreen } from '../screens/CoursesScreen';
 import { CourseDetailScreen } from '../screens/CourseDetailScreen';
 import { MyCoursesScreen } from '../screens/MyCoursesScreen';
-import { ScheduleScreen } from '../screens/ScheduleScreen';
+import { CatalogScreen } from '../screens/CatalogScreen';
 import { CartScreen } from '../screens/CartScreen';
 import { ChatProvider } from '@/context/ChatContext';
 import { ChatButton } from '@/components/chatbot/ChatButton';
@@ -132,14 +132,14 @@ function MainTabs() {
         headerStyle: { backgroundColor: colors.primary, height: 125 },
         headerTitleAlign: 'left',
         headerTintColor: colors.onPrimary,
-        headerTitleStyle: { fontWeight: typography.weight.semibold},
+        headerTitleStyle: { fontWeight: typography.weight.semibold },
         headerTitle: () => (
           <View>
             <Text style={{ color: colors.onPrimary, fontSize: 23, fontWeight: '700' }}>
               Carrito
             </Text>
 
-            <Text style={{ color: colors.onPrimary, fontSize: 13, opacity: 0.8, paddingTop:2 }}>
+            <Text style={{ color: colors.onPrimary, fontSize: 13, opacity: 0.8, paddingTop: 2 }}>
               Revisa tus cursos seleccionados
             </Text>
           </View>
@@ -158,7 +158,7 @@ function MainTabs() {
           let name = 'home-outline' as keyof typeof Ionicons.glyphMap;
           if (r === 'HomeTab') name = focused ? 'home' : 'home-outline';
           else if (r === 'MyCoursesTab') name = focused ? 'book' : 'book-outline';
-          else if (r === 'ScheduleTab') name = focused ? 'calendar' : 'calendar-outline';
+          else if (r === 'CatalogTab') name = focused ? 'school' : 'school-outline';
           else if (r === 'CartTab') name = focused ? 'cart' : 'cart-outline';
           else name = focused ? 'person' : 'person-outline';
           return (
@@ -181,9 +181,12 @@ function MainTabs() {
         options={{ title: tabLabels.myCourses, tabBarLabel: tabLabels.myCourses }}
       />
       <Tab.Screen
-        name="ScheduleTab"
-        component={ScheduleScreen}
-        options={{ title: tabLabels.schedule, tabBarLabel: tabLabels.schedule }}
+        name="CatalogTab"
+        component={CatalogScreen}
+        options={{
+          title: 'Catálogo',
+          tabBarLabel: 'Catálogo',
+        }}
       />
       <Tab.Screen
         name="CartTab"

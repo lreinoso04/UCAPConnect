@@ -17,7 +17,7 @@ export function CourseCard({ course, onPress, index }: CourseCardProps) {
   const inCart = isInCart(course.id);
 
   return (
-    <Animated.View entering={FadeIn.delay(index * 80).duration(400)}>
+    <View>
       <Pressable
         style={styles.card}
         onPress={() => onPress(course)}
@@ -46,8 +46,12 @@ export function CourseCard({ course, onPress, index }: CourseCardProps) {
             <Users size={12} color={Colors.neutral[400]} strokeWidth={2} />
             <Text style={styles.metaText}>{course.students_count}</Text>
           </View>
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>${course.price.toFixed(2)}</Text>
+          <View style={styles.priceRow}><Text style={styles.price}>
+            {(course.price ?? 0).toLocaleString('es-DO', {
+              style: 'currency',
+              currency: 'DOP',
+            })}
+          </Text>
             <TouchableOpacity
               style={[styles.addButton, inCart && styles.addedButton]}
               onPress={() => !inCart && addItem(course)}
@@ -62,7 +66,7 @@ export function CourseCard({ course, onPress, index }: CourseCardProps) {
           </View>
         </View>
       </Pressable>
-    </Animated.View>
+    </View>
   );
 }
 

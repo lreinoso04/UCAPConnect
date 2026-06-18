@@ -14,46 +14,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
- const [items, setItems] = useState<CartItem[]>([
-  {
-    course: {
-      id: '1',
-      name: 'Curso de React Native',
-      description: 'Curso completo de React Native desde cero',
-      price: 49.99,
-      image_url: 'https://ucapconnect.ing.software/api/v1/images?url=https%3A%2F%2Fcap.uapa.edu.do%2Fwp-content%2Fuploads%2F2026%2F06%2FCurso-cap.jpg',
-      category: 'Mobile',
-      rating: 4.8,
-      reviews_count: 30,
-      instructor: 'Eliecer Bautista',
-      duration: '10h',
-      level: 'Intermedio',
-      students_count: 120,
-      badge_color: '#3b82f6',
-      created_at: '2026-01-01',
-    },
-    
-  },
-  {
-    course: {
-      id: '2',
-      name: 'Curso de programacion en Python',
-      description: 'Curso completo de programacion en Python desde cero',
-      price: 49.99,
-      image_url: 'https://ucapconnect.ing.software/api/v1/images?url=https%3A%2F%2Fcap.uapa.edu.do%2Fwp-content%2Fuploads%2F2026%2F06%2FCurso-cap.jpg',
-      category: 'Mobile',
-      rating: 4.8,
-      reviews_count: 30,
-      instructor: 'Eliecer Bautista',
-      duration: '10h',
-      level: 'Intermedio',
-      students_count: 120,
-      badge_color: '#3b82f6',
-      created_at: '2026-01-01',
-    },
-    
-  }
-]);
+const [items, setItems] = useState<CartItem[]>([]);
 
   const addItem = useCallback((course: Course) => {
     setItems(prev => {

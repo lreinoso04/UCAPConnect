@@ -79,7 +79,10 @@ export function CartItemCard({ item }: CartItemCardProps) {
           </View>
 
           <Text style={styles.price}>
-            ${(course.price ?? 0).toFixed(2)}
+            {(course.price ?? 0).toLocaleString('es-DO', {
+              style: 'currency',
+              currency: 'DOP',
+            })}
           </Text>
         </View>
       </View>

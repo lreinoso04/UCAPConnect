@@ -5,7 +5,9 @@ import { CourseDetailScreen } from '../screens/CourseDetailScreen';
 import { CourseEnrollmentScreen } from '../screens/CourseEnrollmentScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { colors, typography } from '../theme';
-import { CartScreen } from '../screens/CartScreen';
+import {CatalogScreen} from '../screens/CatalogScreen';
+import {CatalogDetailScreen} from '../screens/CatalogDetailScreen';
+import {ScheduleScreen} from '../screens/ScheduleScreen';
 import type { HomeStackParamList } from './types';
 
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +32,9 @@ export function HomeStackNavigator() {
       <Stack.Screen name="CourseDetail" component={CourseDetailScreen} options={{ headerShown: false }} />
       <Stack.Screen name="CourseEnrollment" component={CourseEnrollmentScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Catalog" component={CatalogScreen} options={{ headerShown: false }}/>
+      <Stack.Screen name="CatalogDetails" component={CatalogDetailScreen} options={{ headerShown: false }}/>
+      <Stack.Screen name="ScheduleTab" component={ScheduleScreen} options={{ headerShown: false }}/>
     </Stack.Navigator>
   );
 }

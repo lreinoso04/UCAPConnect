@@ -7,7 +7,6 @@ import { CartItemCard } from '../components/cart/CartItemCard';
 
 export function CartScreen() {
   const { items, totalItems, totalPrice, clearCart } = useCart();
-  console.log('CART ITEMS:', items);
 
   const handleClearCart = () => {
     Alert.alert('Vaciar carrito', '¿Eliminar todos los cursos del carrito?', [
@@ -39,7 +38,7 @@ export function CartScreen() {
   }
 
   return (
-    
+
     <View style={styles.root}>
       <View style={styles.header}>
         <View>
@@ -67,15 +66,34 @@ export function CartScreen() {
         <View style={styles.summary}>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>${totalPrice.toFixed(2)}</Text>
+            <Text style={styles.summaryValue}>
+              {totalPrice.toLocaleString('es-DO', {
+                style: 'currency',
+                currency: 'DOP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}
+            </Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Descuento</Text>
-            <Text style={styles.summaryValueFree}>-$0.00</Text>
+            <Text style={styles.summaryValueFree}>
+              -{(0).toLocaleString('es-DO', {
+                style: 'currency',
+                currency: 'DOP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}
+            </Text>
           </View>
           <View style={[styles.summaryRow, styles.totalRow]}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>${totalPrice.toFixed(2)}</Text>
+            <Text style={styles.totalValue}>
+              {totalPrice.toLocaleString('es-DO', {
+                style: 'currency',
+                currency: 'DOP',
+              })}
+            </Text>
           </View>
         </View>
         <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout} activeOpacity={0.8}>
@@ -93,7 +111,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-    title: {
+  title: {
     fontFamily: 'Inter-Bold',
     fontSize: 28,
     color: Colors.neutral[900],

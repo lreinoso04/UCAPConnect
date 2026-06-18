@@ -35,18 +35,30 @@ export function DashboardScreen({ navigation }: Props) {
     parent?.navigate(name);
   }
 
-  function onQuickAction(nav: (typeof quickItems)[number]['nav']) {
-    if (nav === 'courses') {
-      navigation.navigate('CoursesList');
-      return;
-    }
-    if (nav === 'myCourses') goTab('MyCoursesTab');
-    if (nav === 'schedule') goTab('ScheduleTab');
-    if (nav === 'grades') {
-      Alert.alert('Próximamente', 'Esta opción estará disponible en una próxima versión.');
-      return;
-    }
+function onQuickAction(nav: (typeof quickItems)[number]['nav']) {
+  if (nav === 'courses') {
+    navigation.navigate('Catalog');
+    return;
   }
+
+  if (nav === 'myCourses') {
+    goTab('MyCoursesTab');
+    return;
+  }
+
+  if (nav === 'schedule') {
+    navigation.navigate('ScheduleTab');
+    return;
+  }
+
+  if (nav === 'grades') {
+    Alert.alert(
+      'Próximamente',
+      'Esta opción estará disponible en una próxima versión.'
+    );
+    return;
+  }
+}
 
   return (
     <ScrollView
@@ -187,25 +199,25 @@ export function DashboardScreen({ navigation }: Props) {
             </View>
           </Pressable>
         ) : (
-        continueCourses.map((c) => (
-          <View key={c.id} style={styles.courseCard}>
-            <View style={styles.courseIcon}>
-              <Ionicons name="book-outline" size={22} color={colors.primary} />
-            </View>
-            <View style={styles.courseBody}>
-              <Text style={styles.courseTitle}>{c.title}</Text>
-              <Text style={styles.courseMeta}>{c.schedule}</Text>
-              <Text style={styles.courseMeta}>{c.facilitator}</Text>
-              <View style={styles.progressRow}>
-                <View style={styles.progressTrack}>
-                  <View style={[styles.progressFill, { width: `${c.progressPct}%` }]} />
-                </View>
-                <Text style={styles.pct}>{c.progressPct}%</Text>
+          continueCourses.map((c) => (
+            <View key={c.id} style={styles.courseCard}>
+              <View style={styles.courseIcon}>
+                <Ionicons name="book-outline" size={22} color={colors.primary} />
               </View>
-              <Text style={styles.progressFoot}>{c.progressLabel}</Text>
+              <View style={styles.courseBody}>
+                <Text style={styles.courseTitle}>{c.title}</Text>
+                <Text style={styles.courseMeta}>{c.schedule}</Text>
+                <Text style={styles.courseMeta}>{c.facilitator}</Text>
+                <View style={styles.progressRow}>
+                  <View style={styles.progressTrack}>
+                    <View style={[styles.progressFill, { width: `${c.progressPct}%` }]} />
+                  </View>
+                  <Text style={styles.pct}>{c.progressPct}%</Text>
+                </View>
+                <Text style={styles.progressFoot}>{c.progressLabel}</Text>
+              </View>
             </View>
-          </View>
-        ))
+          ))
         )}
       </View>
 
