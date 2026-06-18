@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { getCourses } from '@/services/course';
 import { HomeStackParamList } from '@/navigation/types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { blue } from 'react-native-reanimated/lib/typescript/Colors';
 
 const CATEGORIES = ['Todos', 'Tecnología', 'Diseño', 'Marketing', 'Negocios', 'Creatividad'];
 
@@ -79,7 +80,7 @@ export function CatalogScreen() {
         <View style={styles.root}>
             <View style={styles.header}>
                 <View>
-                    <Text style={styles.greeting}>Descubre</Text>
+                    <Text style={styles.greeting}>Catalogo</Text>
                     <Text style={styles.subtitle}>Cursos y capacitaciones</Text>
                 </View>
                 <View style={styles.iconCircle}>
@@ -135,8 +136,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingTop: 16,
+        paddingTop: 50,
         paddingBottom: 12,
+        backgroundColor: '#041147'
     },
     filterContainer: {
         height: 60,
@@ -145,7 +147,7 @@ const styles = StyleSheet.create({
     greeting: {
         fontFamily: 'Inter-Bold',
         fontSize: 28,
-        color: Colors.neutral[900],
+        color: "#FFFF",
         lineHeight: 34,
     },
     subtitle: {

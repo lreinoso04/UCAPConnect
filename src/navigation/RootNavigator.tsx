@@ -182,10 +182,14 @@ function MainTabs() {
       />
       <Tab.Screen
         name="CatalogTab"
-        component={CatalogScreen}
+        component={HomeStackNavigator}
+        initialParams={{ screen: 'Catalog' } as any}
         options={{
           title: 'Catálogo',
           tabBarLabel: 'Catálogo',
+          headerStyle: {
+            backgroundColor: colors.primary,
+        },
         }}
       />
       <Tab.Screen
