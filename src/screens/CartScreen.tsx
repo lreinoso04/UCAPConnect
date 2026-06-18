@@ -4,9 +4,14 @@ import { ShoppingCart, Trash2, ArrowRight, GraduationCap } from 'lucide-react-na
 import { Colors } from '../colors';
 import { useCart } from '../context/CartContext';
 import { CartItemCard } from '../components/cart/CartItemCard';
+import { useNavigation } from '@react-navigation/native';
+import { MainTabParamList } from '../navigation/types';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
 export function CartScreen() {
   const { items, totalItems, totalPrice, clearCart } = useCart();
+  const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
+
 
   const handleClearCart = () => {
     Alert.alert('Vaciar carrito', '¿Eliminar todos los cursos del carrito?', [
@@ -30,7 +35,7 @@ export function CartScreen() {
         </View>
         <Text style={styles.emptyTitle}>Tu carrito está vacío</Text>
         <Text style={styles.emptySubtitle}>Explora el catálogo para inscribirte en cursos</Text>
-        <TouchableOpacity style={styles.browseButton} activeOpacity={0.8}>
+        <TouchableOpacity style={styles.browseButton} activeOpacity={0.8} onPress={() => navigation.navigate('CatalogTab')}>
           <Text style={styles.browseButtonText}>Ver catálogo</Text>
         </TouchableOpacity>
       </View>
