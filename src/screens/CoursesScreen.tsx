@@ -16,7 +16,6 @@ import { Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fetchCourses } from '../api/courses';
 import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
 import { ApiException } from '../api/client';
 import type { HomeStackParamList } from '../navigation/types';
 import type { CursoResponse } from '../types/api';

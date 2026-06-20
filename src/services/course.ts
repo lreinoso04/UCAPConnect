@@ -3,8 +3,24 @@ import { API_BASE_URL } from '../config';
 
 
 
-export async function getCourses(): Promise<Course[]> {
-const response = await fetch(`${API_BASE_URL}/api/v1/courses`);
+export async function getCourses(
+  page: number = 1,
+  perPage: number = 10,
+  search?: string
+): Promise<Course[]> {
+
+  const params = new URLSearchParams();
+
+  params.append('page', page.toString());
+  params.append('perPage', perPage.toString());
+
+  if (search?.trim()) {
+    params.append('search', search.trim());
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/courses?${params.toString()}`
+  );
 
   if (!response.ok) {
     throw new Error('Error al obtener cursos');

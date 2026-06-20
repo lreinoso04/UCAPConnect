@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, RefreshControl, Dimensions } from 'react-native';
-import { GraduationCap, SlidersHorizontal } from 'lucide-react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, RefreshControl, Dimensions, TextInput } from 'react-native';
+import { GraduationCap, SlidersHorizontal, Search } from 'lucide-react-native';
 import { Course } from '../types/product';
 import { Colors } from '../colors';
 import { CourseCard } from '../components/cart/ProductCard';
@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { getCourses } from '@/services/course';
 import { HomeStackParamList } from '@/navigation/types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { blue } from 'react-native-reanimated/lib/typescript/Colors';
+import { colors } from '@/theme';
 
 const CATEGORIES = ['Todos', 'Tecnología', 'Diseño', 'Marketing', 'Negocios', 'Creatividad'];
 
@@ -21,6 +21,11 @@ const CARD_WIDTH = (screenWidth - 40 - CARD_MARGIN) / numColumns;
 export function CatalogScreen() {
     const [courses, setCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchText, setSearchText] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('Todos');
     const [error, setError] = useState<string | null>(null);
@@ -30,25 +35,24 @@ export function CatalogScreen() {
 
     const fetchCourses = useCallback(async () => {
         try {
-            setLoading(true); // 👈 IMPORTANTE
+            setLoading(true);
             setError(null);
 
-            const data = await getCourses();
+            const data = await getCourses(1, 10, searchTerm);
 
-            const filteredCourses =
-                selectedCategory === 'Todos'
-                    ? data
-                    : data.filter(course => course.category === selectedCategory);
+            setCourses(data);
+            setPage(1);
 
-            setCourses(filteredCourses);
+            // Si devuelve menos de 10, ya no hay más páginas
+            setHasMore(data.length === 10);
+
         } catch (error) {
-            console.error(error);
             setError('Error al cargar cursos.');
         } finally {
-            setLoading(false);      // 👈 ESTO TE FALTABA
+            setLoading(false);
             setRefreshing(false);
         }
-    }, [selectedCategory]);
+    }, [searchTerm]);
 
     const onRefresh = () => {
         setRefreshing(true);
@@ -56,7 +60,6 @@ export function CatalogScreen() {
     };
 
     const handleCoursePress = (course: Course) => {
-        console.log('Curso seleccionado:', course.id);
         navigation.navigate('CatalogDetails', {
             id: course.id,
         });
@@ -76,6 +79,39 @@ export function CatalogScreen() {
         );
     }
 
+    const loadMoreCourses = async () => {
+
+        if (loading || loadingMore || !hasMore) {
+            return;
+        }
+
+        try {
+
+            setLoadingMore(true);
+
+            const nextPage = page + 1;
+
+            const newCourses = await getCourses(
+                nextPage,
+                10,
+                searchTerm
+            );
+
+            setCourses(prev => [...prev, ...newCourses]);
+
+            setPage(nextPage);
+
+            if (newCourses.length < 10) {
+                setHasMore(false);
+            }
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
     return (
         <View style={styles.root}>
             <View style={styles.header}>
@@ -85,6 +121,30 @@ export function CatalogScreen() {
                 </View>
                 <View style={styles.iconCircle}>
                     <SlidersHorizontal size={20} color={Colors.primary[600]} strokeWidth={2} />
+                </View>
+            </View>
+            <View style={styles.searchContainer}>
+                <View style={styles.searchBox}>
+                    <Search
+                        size={20}
+                        color={Colors.neutral[400]}
+                        strokeWidth={2}
+                    />
+
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Buscar cursos..."
+                        placeholderTextColor={Colors.neutral[400]}
+                        value={searchText}
+                        onChangeText={setSearchText}
+                        returnKeyType="search"
+                        onSubmitEditing={() => {
+                            setCourses([]);
+                            setPage(1);
+                            setHasMore(true);
+                            setSearchTerm(searchText);
+                        }}
+                    />
                 </View>
             </View>
 
@@ -98,7 +158,7 @@ export function CatalogScreen() {
 
             {error ? (
                 <View style={styles.errorContainer}>
-                    {/* <GraduationCap size={48} color={Colors.neutral[300]} strokeWidth={1.5} /> */}
+                    <GraduationCap size={48} color={Colors.neutral[300]} strokeWidth={1.5} />
                     <Text style={styles.errorText}>{error}</Text>
                 </View>
             ) : courses.length === 0 ? (
@@ -114,14 +174,40 @@ export function CatalogScreen() {
                     contentContainerStyle={styles.grid}
                     columnWrapperStyle={styles.row}
                     showsVerticalScrollIndicator={false}
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary[600]} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            tintColor={Colors.primary[600]}
+                        />
+                    }
                     renderItem={({ item, index }) => (
                         <View style={styles.cardWrapper}>
-                            <CourseCard course={item} onPress={handleCoursePress} index={index} />
+                            <CourseCard
+                                course={item}
+                                onPress={handleCoursePress}
+                                index={index}
+                            />
                         </View>
                     )}
+                    onEndReached={loadMoreCourses}
+                    onEndReachedThreshold={0.5}
+                    ListFooterComponent={
+                        loadingMore ? (
+                            <View style={styles.footerLoader}>
+                                <ActivityIndicator
+                                    size="small"
+                                    color={Colors.primary[600]}
+                                />
+                                <Text style={styles.footerText}>
+                                    Cargando más cursos...
+                                </Text>
+                            </View>
+                        ) : null
+                    }
                 />
             )}
+
         </View>
     );
 }
@@ -137,8 +223,45 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingTop: 50,
-        paddingBottom: 12,
+        paddingBottom: 18,
         backgroundColor: '#041147'
+    },
+    searchContainer: {
+        paddingHorizontal: 20,
+        paddingTop: 5,
+        paddingBottom: 1,
+    },
+    footerLoader: {
+        paddingVertical: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    footerText: {
+        marginTop: 8,
+        fontFamily: 'Inter-Regular',
+        fontSize: 13,
+        color: Colors.neutral[500],
+    },
+
+    searchBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 54,
+        backgroundColor: '#F8FAFC',
+        borderRadius: 18,
+        paddingHorizontal: 16,
+        gap: 12,
+
+        borderWidth: 1,
+        borderColor: '#EEF2F7',
+    },
+
+    searchInput: {
+        flex: 1,
+        fontSize: 15,
+        fontFamily: 'Inter-Regular',
+        color: Colors.neutral[900],
     },
     filterContainer: {
         height: 60,
@@ -146,13 +269,13 @@ const styles = StyleSheet.create({
     },
     greeting: {
         fontFamily: 'Inter-Bold',
-        fontSize: 28,
-        color: "#FFFF",
+        fontSize: 23,
+        color: colors.onPrimary,
         lineHeight: 34,
     },
     subtitle: {
         fontFamily: 'Inter-Regular',
-        fontSize: 14,
+        fontSize: 13,
         color: Colors.neutral[400],
         marginTop: 2,
     },
