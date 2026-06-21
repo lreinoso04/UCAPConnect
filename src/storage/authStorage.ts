@@ -7,6 +7,7 @@ export interface StoredAuth {
   username: string;
   rol: string;
   img: string | null;
+  expireAt: string;
 }
 
 export async function saveAuth(data: StoredAuth): Promise<void> {

@@ -12,9 +12,9 @@ interface CourseCardProps {
   index: number;
 }
 
-export function CourseCard({ course, onPress, index }: CourseCardProps) {
+export function CourseCard({ course, onPress}: CourseCardProps) {
   const { addItem, isInCart } = useCart();
-  const inCart = isInCart(course.id);
+  const inCart = isInCart(Number(course.id));
 
   return (
     <View>
@@ -54,7 +54,7 @@ export function CourseCard({ course, onPress, index }: CourseCardProps) {
           </Text>
             <TouchableOpacity
               style={[styles.addButton, inCart && styles.addedButton]}
-              onPress={() => !inCart && addItem(course)}
+              onPress={() => !inCart && addItem(Number(course.id))}
               activeOpacity={inCart ? 1 : 0.7}
             >
               {inCart ? (

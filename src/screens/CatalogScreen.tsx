@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, RefreshControl, Dimensions, TextInput } from 'react-native';
-import { GraduationCap, SlidersHorizontal, Search } from 'lucide-react-native';
+import { GraduationCap, Search } from 'lucide-react-native';
 import { Course } from '../types/product';
 import { Colors } from '../colors';
 import { CourseCard } from '../components/cart/ProductCard';
@@ -119,9 +119,7 @@ export function CatalogScreen() {
                     <Text style={styles.greeting}>Catalogo</Text>
                     <Text style={styles.subtitle}>Cursos y capacitaciones</Text>
                 </View>
-                <View style={styles.iconCircle}>
-                    <SlidersHorizontal size={20} color={Colors.primary[600]} strokeWidth={2} />
-                </View>
+               
             </View>
             <View style={styles.searchContainer}>
                 <View style={styles.searchBox}>

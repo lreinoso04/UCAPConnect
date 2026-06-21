@@ -54,13 +54,20 @@ export function CatalogDetailScreen() {
         );
     }
 
-    const inCart = isInCart(course.id);
+    const inCart = isInCart(Number(course.id));
 
-    const handleEnroll = () => {
-        if (!inCart) {
-            addItem(course);
+    const handleEnroll = async () => {
+        try {
+            if (!inCart) {
+                console.log('Agregando curso:', course.id);
+
+                await addItem(Number(course.id));
+            }
+
+            navigation.goBack();
+        } catch (error) {
+            console.error('Error agregando curso:', error);
         }
-        navigation.goBack();
     };
 
     return (

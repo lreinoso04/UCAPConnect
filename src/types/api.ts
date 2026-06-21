@@ -3,7 +3,7 @@ export interface LoginResponse {
   token: string;
   rol: string;
   img: string | null;
-  expireIn: number;
+  expireIn: string;
 }
 
 export interface RegisterPayload {

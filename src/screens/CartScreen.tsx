@@ -1,17 +1,22 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { ShoppingCart, Trash2, ArrowRight, GraduationCap } from 'lucide-react-native';
+import { Trash2, ArrowRight, GraduationCap } from 'lucide-react-native';
 import { Colors } from '../colors';
 import { useCart } from '../context/CartContext';
 import { CartItemCard } from '../components/cart/CartItemCard';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { MainTabParamList } from '../navigation/types';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
 export function CartScreen() {
-  const { items, totalItems, totalPrice, clearCart } = useCart();
+  const { items, totalItems, totalPrice, clearCart, loadCart} = useCart();
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
 
+  useFocusEffect(
+  useCallback(() => {
+    loadCart();
+  }, [loadCart])
+);
 
   const handleClearCart = () => {
     Alert.alert('Vaciar carrito', '¿Eliminar todos los cursos del carrito?', [
@@ -57,7 +62,7 @@ export function CartScreen() {
 
       <FlatList
         data={items}
-        keyExtractor={item => item.course.id}
+        keyExtractor={item => item.cursoId.toString()}
         contentContainerStyle={[
           styles.list,
           items.length === 0 && { flexGrow: 1 }

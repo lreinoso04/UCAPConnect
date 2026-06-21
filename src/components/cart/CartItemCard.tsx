@@ -1,26 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Trash2, Clock, Users } from 'lucide-react-native';
-import { CartItem } from '@/types/product';
+import { Trash2, Clock } from 'lucide-react-native';
 import { Colors } from '@/colors';
-import { useCart } from '@/context/CartContext';
+import { useCart, CartApiItem } from '@/context/CartContext';
 
 interface CartItemCardProps {
-  item: CartItem;
+  item: CartApiItem;
 }
 
 export function CartItemCard({ item }: CartItemCardProps) {
   const { removeItem } = useCart();
 
-  const course = item?.course;
-
-  // 🔒 PROTECCIÓN CRÍTICA
-  if (!course) return null;
-
   return (
     <View style={styles.card}>
       <Image
-        source={{ uri: course.image_url || '' }}
+        source={{ uri: item.imagenUrl }}
         style={styles.image}
         resizeMode="cover"
       />
@@ -29,57 +23,61 @@ export function CartItemCard({ item }: CartItemCardProps) {
         <View style={styles.topRow}>
           <View style={styles.textCol}>
             <Text style={styles.name} numberOfLines={2}>
-              {course.name || 'Sin nombre'}
+              {item.titulo}
             </Text>
+
             <Text style={styles.instructor}>
-              {course.instructor || 'Sin instructor'}
+              {item.facilitador}
             </Text>
           </View>
 
           <TouchableOpacity
             style={styles.deleteButton}
-            onPress={() => removeItem(course.id)}
+            onPress={() => removeItem(item.cursoId)}
             activeOpacity={0.7}
           >
-            <Trash2 size={18} color={Colors.error[500]} strokeWidth={2} />
+            <Trash2
+              size={18}
+              color={Colors.error[500]}
+              strokeWidth={2}
+            />
           </TouchableOpacity>
         </View>
 
         <View style={styles.metaRow}>
           <View style={styles.metaItem}>
-            <Clock size={12} color={Colors.neutral[400]} strokeWidth={2} />
+            <Clock
+              size={12}
+              color={Colors.neutral[400]}
+              strokeWidth={2}
+            />
             <Text style={styles.metaText}>
-              {course.duration || 'N/A'}
+              {item.tiempo}
             </Text>
           </View>
 
           <View style={styles.metaItem}>
-            <Users size={12} color={Colors.neutral[400]} strokeWidth={2} />
             <Text style={styles.metaText}>
-              {course.students_count || 0} estudiantes
+              {item.modalidad}
+            </Text>
+          </View>
+
+          <View style={styles.metaItem}>
+            <Text style={styles.metaText}>
+              {item.recinto}
             </Text>
           </View>
         </View>
 
         <View style={styles.bottomRow}>
-          <View
-            style={[
-              styles.levelTag,
-              { backgroundColor: (course.badge_color || '#000') + '15' }
-            ]}
-          >
-            <Text
-              style={[
-                styles.levelText,
-                { color: course.badge_color || Colors.neutral[600] }
-              ]}
-            >
-              {course.level || 'N/A'}
+          <View style={styles.levelTag}>
+            <Text style={styles.levelText}>
+              Curso
             </Text>
           </View>
 
           <Text style={styles.price}>
-            {(course.price ?? 0).toLocaleString('es-DO', {
+            {item.precio.toLocaleString('es-DO', {
               style: 'currency',
               currency: 'DOP',
             })}
@@ -89,6 +87,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   card: {

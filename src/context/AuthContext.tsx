@@ -1,10 +1,11 @@
+// Archivo: src/context/AuthContext.tsx
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { login as apiLogin, logout as apiLogout, registerStudent } from '../api/auth';
 import { uploadProfilePicture } from '../api/student';
 import { clearStoredSession, loadAuth, saveAuth, type StoredAuth } from '../storage/authStorage';
-import { loadGuestSession, setGuestSession } from '../storage/guestStorage';
 import type { RegisterPayload } from '../types/api';
 import { ApiException } from '../api/client';
+import { authEvents } from '../api/authEvents'; // 👈 1. IMPORTAMOS EL MENSAJERO GLOBAL
 
 type AuthState = {
   user: StoredAuth | null;
@@ -18,7 +19,6 @@ type AuthState = {
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
-// Helper para evitar que las Promesas de SecureStore o AsyncStorage se cuelguen infinitamente en Android
 const withTimeout = <T,>(promise: Promise<T>, ms: number = 3000): Promise<T | null> => {
   return Promise.race([
     promise,
@@ -30,15 +30,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<StoredAuth | null>(null);
   const [ready, setReady] = useState(false);
 
+  // 🔥 2. AGREGADO: Escucha global para el Caso 2 y Caso 3 (Botón de pánico)
+  useEffect(() => {
+    const unsubscribe = authEvents.subscribe(async () => {
+      await clearStoredSession(); // Borra el token viejo del teléfono
+      setUser(null);              // Saca al usuario al Login inmediatamente
+    });
+    return () => unsubscribe();   // Limpia la escucha si el componente se desmonta
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const stored = await withTimeout(loadAuth());
-        
+
         if (!cancelled) {
           if (stored) {
-            setUser(stored);
+            const expired =
+              new Date(stored.expireAt).getTime() <= Date.now();
+
+            if (expired) {
+              await clearStoredSession();
+              setUser(null);
+            } else {
+              setUser(stored);
+            }
           } else {
             setUser(null);
           }
@@ -56,6 +73,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+   const logout = useCallback(async () => {
+    if (user?.token) {
+      try {
+        await apiLogout(user.token);
+      } catch {}
+    }
+    await clearStoredSession();
+    setUser(null);
+  }, [user?.token]);
+
+  useEffect(() => {
+    if (!user?.expireAt) return;
+
+    const expiresIn =
+      new Date(user.expireAt).getTime() - Date.now();
+
+    if (expiresIn <= 0) {
+      logout();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      logout();
+    }, expiresIn);
+
+    return () => clearTimeout(timer);
+  }, [user, logout]);
+
   const login = useCallback(async (username: string, password: string) => {
     const res = await apiLogin(username, password);
     if (!res.token) {
@@ -66,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       username: res.username,
       rol: res.rol,
       img: res.img ?? null,
+      expireAt: res.expireIn,
     };
     await saveAuth(next);
     setUser(next);
@@ -74,18 +120,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = useCallback(async (payload: RegisterPayload) => {
     return registerStudent(payload);
   }, []);
-
-  const logout = useCallback(async () => {
-    if (user?.token) {
-      try {
-        await apiLogout(user.token);
-      } catch {
-        /* ignorar */
-      }
-    }
-    await clearStoredSession();
-    setUser(null);
-  }, [user?.token]);
 
   const restoreSession = useCallback(async (data: StoredAuth) => {
     await saveAuth(data);
