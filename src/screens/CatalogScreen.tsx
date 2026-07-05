@@ -213,7 +213,7 @@ export function CatalogScreen() {
 const styles = StyleSheet.create({
     root: {
         flex: 1,
-        backgroundColor: Colors.background,
+        backgroundColor: colors.surface,
     },
     header: {
         flexDirection: 'row',

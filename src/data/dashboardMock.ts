@@ -33,31 +33,7 @@ export const continueCourses: ContinueCourse[] = [
     facilitator: 'Ing. Pedro Milano',
     progressPct: 75,
     progressLabel: 'Progreso - Módulo 7 de 12 - Equipos HD',
-  },
-  {
-    id: '2',
-    title: 'Inteligencia Artificial aplicada a la Docencia',
-    schedule: 'Disponible 24/7 · Virtual',
-    facilitator: 'Dra. Carmen Lugo',
-    progressPct: 50,
-    progressLabel: 'Progreso - Módulo 4 de 8 - Evaluación formativa',
-  },
-  {
-    id: '3',
-    title: 'Taller - Ciberseguridad para Redes Empresariales',
-    schedule: 'Sábados de 9:00 a. m. a 12:00 p. m. · Virtual',
-    facilitator: 'Mtro. Luis Fernández',
-    progressPct: 20,
-    progressLabel: 'Progreso - Módulo 2 de 5 - Amenazas comunes',
-  },
-  {
-    id: '4',
-    title: 'Especialidad - Gestión y Dirección de Centros Educativos',
-    schedule: 'Miércoles y Viernes 6:00 - 9:00 p. m. · Híbrido',
-    facilitator: 'Dra. Josefina Marte',
-    progressPct: 90,
-    progressLabel: 'Progreso - Proyecto final',
-  },
+  }
 ];
 
 export type UpcomingEvent = {

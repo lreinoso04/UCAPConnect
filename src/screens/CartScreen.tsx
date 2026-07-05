@@ -7,16 +7,18 @@ import { CartItemCard } from '../components/cart/CartItemCard';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { MainTabParamList } from '../navigation/types';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
+import { createPaymentIntent } from '@/services/payment';
 
 export function CartScreen() {
-  const { items, totalItems, totalPrice, clearCart, loadCart} = useCart();
+  const { items, totalItems, totalPrice, clearCart, loadCart } = useCart();
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
 
   useFocusEffect(
-  useCallback(() => {
-    loadCart();
-  }, [loadCart])
-);
+    useCallback(() => {
+      loadCart();
+    }, [loadCart])
+  );
 
   const handleClearCart = () => {
     Alert.alert('Vaciar carrito', '¿Eliminar todos los cursos del carrito?', [
@@ -25,13 +27,41 @@ export function CartScreen() {
     ]);
   };
 
-  const handleCheckout = () => {
-    Alert.alert(
-      'Inscribirse',
-      `Total: $${totalPrice.toFixed(2)}`
-    );
-  };
+  const handleCheckout = async () => {
+    try {
 
+      const payment = await createPaymentIntent();
+
+      const { error } = await initPaymentSheet({
+        merchantDisplayName: 'UCAP Connect',
+        paymentIntentClientSecret: payment.clientSecret,
+        returnURL: 'ucapconnect://stripe-redirect',
+
+      });
+
+      if (error) {
+        Alert.alert('Error', error.message);
+        return;
+      }
+
+      const result = await presentPaymentSheet();
+
+      if (result.error) {
+        Alert.alert('Pago cancelado', result.error.message);
+        return;
+      }
+
+      // 1. Notificar éxito
+      Alert.alert('Éxito', 'Pago realizado correctamente');
+
+      // 3. Recargar carrito desde backend (importante)
+      await loadCart();
+
+    } catch (error) {
+      console.log('CATCH ERROR:', error);
+      Alert.alert('Error', 'No fue posible procesar el pago');
+    }
+  };
   if (items.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -107,9 +137,17 @@ export function CartScreen() {
           </View>
         </View>
         <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout} activeOpacity={0.8}>
-          <Text style={styles.checkoutText}>Inscribirme</Text>
+          <Text style={styles.checkoutText}>Proceder al pago</Text>
           <ArrowRight size={20} color={Colors.white} strokeWidth={2} />
         </TouchableOpacity>
+        <View style={styles.paymentInfo}>
+          <Text style={styles.secureText}>
+            🔒 Pago seguro procesado por Stripe
+          </Text>
+          <Text style={styles.cardsText}>
+            Visa • Mastercard  • Apple Pay • American Express
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -159,6 +197,22 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 20,
     paddingBottom: 16,
+  },
+  paymentInfo: {
+    alignItems: 'center',
+    marginTop: 12,
+  },
+
+  secureText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 12,
+    color: Colors.neutral[500],
+  },
+
+  cardsText: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 10,
+    color: Colors.neutral[400],
   },
   footer: {
     backgroundColor: Colors.white,

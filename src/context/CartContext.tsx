@@ -116,7 +116,7 @@ export function CartProvider({
       const data: CartResponse = await response.json();
       setCart(data);
     } catch (error) {
-      console.log('loadCart:', error);
+      
     } finally {
       setLoading(false);
     }

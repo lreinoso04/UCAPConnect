@@ -157,12 +157,12 @@ const styles = StyleSheet.create({
     header: {
         paddingHorizontal: 18,
         paddingTop: 18,
-        paddingBottom: 6,
+        paddingBottom: 1,
     },
 
     bodyContent: {
         paddingHorizontal: 18,
-        paddingBottom: 18,
+        paddingBottom: 0,
     },
 
     logo: {
@@ -174,25 +174,25 @@ const styles = StyleSheet.create({
         fontSize: IS_SMALL_SCREEN ? 20 : 24,
         fontWeight: '700',
         color: '#001B5E',
-        marginBottom: 8,
+        marginBottom: 5,
     },
 
     statusContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 18,
+        marginBottom: 5,
     },
 
     onlineDot: {
-        width: 10,
-        height: 10,
+        width: 8,
+        height: 8,
         borderRadius: 5,
         backgroundColor: '#22C55E',
         marginRight: 8,
     },
 
     statusText: {
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: '600',
         color: '#16A34A',
     },

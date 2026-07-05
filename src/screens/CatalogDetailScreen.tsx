@@ -26,7 +26,7 @@ export function CatalogDetailScreen() {
 
                 setCourse(data);
             } catch (error) {
-                console.error('Error cargando curso:', error);
+                console.log('Error cargando curso:', error);
                 setCourse(null);
             } finally {
                 setLoading(false);
@@ -66,7 +66,7 @@ export function CatalogDetailScreen() {
 
             navigation.goBack();
         } catch (error) {
-            console.error('Error agregando curso:', error);
+            console.log('Error agregando curso:', error);
         }
     };
 
@@ -180,7 +180,7 @@ export function CatalogDetailScreen() {
                 >
                     <ShoppingCart size={20} color={Colors.white} strokeWidth={2} />
                     <Text style={styles.enrollText}>
-                        {inCart ? 'Ya en carrito' : 'Inscribirme'}
+                        {inCart ? 'Ya en carrito' : 'Agregar al Carrito'}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
     },
     enrollText: {
         fontFamily: 'Inter-Bold',
-        fontSize: 16,
+        fontSize: 14,
         color: Colors.white,
     },
 });

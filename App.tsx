@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/context/AuthContext';
 import { CartProvider } from './src/context/CartContext';
 import { RootNavigator } from './src/navigation/RootNavigator';
+import { StripeProvider } from '@stripe/stripe-react-native';
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* ya oculto o no disponible en web */
@@ -42,14 +43,18 @@ class ErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean,
 export default function App() {
   return (
     <ErrorBoundary>
-      <SafeAreaProvider>
-        <AuthProvider>
-          <CartProvider>
-            <RootNavigator />
-            <StatusBar style="light" />
-          </CartProvider>
-        </AuthProvider>
-      </SafeAreaProvider>
+      <StripeProvider
+        publishableKey="pk_test_51TeeoMQosYfPbGLEWKfBws4tvHYwywQhX64fOKBTrH3AAFywukNUIdsEQYhL9MeRbc9TcsHJcQtiy2ivf9yOEm1m00mMy2MzAv"
+      >
+        <SafeAreaProvider>
+          <AuthProvider>
+            <CartProvider>
+              <RootNavigator />
+              <StatusBar style="light" />
+            </CartProvider>
+          </AuthProvider>
+        </SafeAreaProvider>
+      </StripeProvider>
     </ErrorBoundary>
   );
 }
