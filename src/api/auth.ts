@@ -8,6 +8,10 @@ export function login(username: string, password: string) {
 export function registerStudent(payload: RegisterPayload) {
   return apiRequest<Record<string, string>>('/api/v1/auth/register', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Client-Platform': 'mobile',
+    },
     body: payload,
   });
 }
@@ -32,6 +36,10 @@ export function changePassword(payload: ChangePasswordRequestDTO, token: string)
 export function forgotPassword(email: string) {
   return apiRequest<{ message: string }>('/api/v1/auth/forgot-password', {
     method: 'POST',
+     headers: {
+      'Content-Type': 'application/json',
+      'X-Client-Platform': 'mobile',
+    },
     body: { email },
   });
 }

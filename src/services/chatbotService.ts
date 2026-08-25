@@ -51,7 +51,6 @@ class ChatbotService {
         throw new Error(data.response || 'Error en la respuesta del chatbot');
       }
       
-      console.log('[ChatbotService] Retornando respuesta:', data.response);
       return data.response;
     } catch (error) {
       if (error instanceof Error) {
