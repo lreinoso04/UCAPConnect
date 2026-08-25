@@ -16,26 +16,6 @@ export const weeklyActivity = [
   { label: 'D', value: 0.25 },
 ];
 
-export type ContinueCourse = {
-  id: string;
-  title: string;
-  schedule: string;
-  facilitator: string;
-  progressPct: number;
-  progressLabel: string;
-};
-
-export const continueCourses: ContinueCourse[] = [
-  {
-    id: '1',
-    title: 'Diplomado - Hemodiálisis y terapia de reemplazo renal',
-    schedule: 'Viernes 7:00 - 10:00 p. m. · Virtual',
-    facilitator: 'Ing. Pedro Milano',
-    progressPct: 75,
-    progressLabel: 'Progreso - Módulo 7 de 12 - Equipos HD',
-  }
-];
-
 export type UpcomingEvent = {
   id: string;
   day: string;

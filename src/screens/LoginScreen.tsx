@@ -92,10 +92,10 @@ export function LoginScreen({ navigation, route }: Props) {
           <Text style={styles.welcome}>¡Bienvenido!</Text>
           <Text style={styles.welcomeHint}>Inicia sesión para continuar</Text>
 
-          <Text style={styles.fieldLabel}>Usuario / Correo</Text>
+          <Text style={styles.fieldLabel}>Usuario</Text>
           <TextInput
             style={styles.input}
-            placeholder="Tu usuario o correo..."
+            placeholder="Ingresa tu usuario"
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}

@@ -86,7 +86,7 @@ export function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { user, logout, updateUserImage } = useAuth();
   const isGuest = !user;
-  const exitGuestToLogin = () => {};
+  const exitGuestToLogin = () => { };
   const [form, setForm] = useState<EstudianteProfile>(emptyProfile);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -388,12 +388,6 @@ export function ProfileScreen() {
             onPress={() => (isStudent ? openPwModal() : soon('Seguridad y contraseña'))}
           />
           <View style={styles.menuSep} />
-          <MenuRow
-            icon="card-outline"
-            title="Medios de pago"
-            subtitle="Tarjeta de crédito…"
-            onPress={() => soon('Medios de pago')}
-          />
           {isStudent ? (
             <Text style={styles.inlineHint}>Toca correo o teléfono para editar tus datos personales.</Text>
           ) : null}
@@ -434,6 +428,10 @@ export function ProfileScreen() {
           />
         </Card>
 
+        <Text style={styles.versionText}>
+          UcapConnect v1.0.0
+        </Text>
+
         <Pressable style={styles.logoutBtn} onPress={() => logout()}>
           <Text style={styles.logoutBtnText}>Cerrar sesión</Text>
         </Pressable>
@@ -447,127 +445,127 @@ export function ProfileScreen() {
             keyboardVerticalOffset={Platform.OS === 'ios' ? 48 : 0}
             style={styles.modalKeyboard}
           >
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Editar datos personales</Text>
-              <Pressable onPress={closeEditModal} hitSlop={12} accessibilityLabel="Cerrar">
-                <Ionicons name="close" size={26} color={colors.textMuted} />
-              </Pressable>
-            </View>
-            <Text style={styles.modalHint}>
-              Teléfono RD (809/829/849); la fecha se elige con el calendario.
-            </Text>
-            <ScrollView
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.modalScroll}
-            >
-              <Text style={styles.label}>Nombre</Text>
-              <TextInput
-                style={[styles.inputNormal, fieldErrors.nombre && styles.inputError]}
-                value={draft?.nombre ?? ''}
-                onChangeText={(t) => {
-                  setDraft((d) => (d ? { ...d, nombre: t } : d));
-                  setFieldErrors((fe) => ({ ...fe, nombre: undefined }));
-                }}
-                editable={!saving}
-                autoCapitalize="words"
-              />
-              {fieldErrors.nombre ? <Text style={styles.fieldErr}>{fieldErrors.nombre}</Text> : null}
-
-              <Text style={styles.label}>Apellidos</Text>
-              <TextInput
-                style={[styles.inputNormal, fieldErrors.apellidos && styles.inputError]}
-                value={draft?.apellidos ?? ''}
-                onChangeText={(t) => {
-                  setDraft((d) => (d ? { ...d, apellidos: t } : d));
-                  setFieldErrors((fe) => ({ ...fe, apellidos: undefined }));
-                }}
-                editable={!saving}
-                autoCapitalize="words"
-              />
-              {fieldErrors.apellidos ? <Text style={styles.fieldErr}>{fieldErrors.apellidos}</Text> : null}
-
-              <Text style={styles.label}>Correo</Text>
-              <TextInput
-                style={[styles.inputNormal, fieldErrors.correo && styles.inputError]}
-                value={draft?.correo ?? ''}
-                onChangeText={(t) => {
-                  setDraft((d) => (d ? { ...d, correo: t } : d));
-                  setFieldErrors((fe) => ({ ...fe, correo: undefined }));
-                }}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={!saving}
-              />
-              {fieldErrors.correo ? <Text style={styles.fieldErr}>{fieldErrors.correo}</Text> : null}
-
-              <Text style={styles.label}>Teléfono</Text>
-              <TextInput
-                style={[styles.inputNormal, fieldErrors.telefono && styles.inputError]}
-                value={formatPhoneRdDisplay(draft?.telefono ?? '')}
-                onChangeText={(t) => {
-                  const digits = normalizePhoneRd(t);
-                  setDraft((d) => (d ? { ...d, telefono: digits } : d));
-                  setFieldErrors((fe) => ({ ...fe, telefono: undefined }));
-                }}
-                keyboardType="phone-pad"
-                placeholder="809-123-4567"
-                placeholderTextColor={colors.textMuted}
-                editable={!saving}
-                maxLength={12}
-              />
-              {fieldErrors.telefono ? <Text style={styles.fieldErr}>{fieldErrors.telefono}</Text> : null}
-
-              <Text style={styles.label}>Fecha de nacimiento</Text>
-              <BirthDatePickerField
-                value={draft?.fechaNacimiento ?? ''}
-                onChange={(ddMmYyyy) => {
-                  setDraft((d) => (d ? { ...d, fechaNacimiento: ddMmYyyy } : d));
-                  setFieldErrors((fe) => ({ ...fe, fechaNacimiento: undefined }));
-                }}
-                hasError={Boolean(fieldErrors.fechaNacimiento)}
-                disabled={saving}
-                placeholder="dd-MM-yyyy"
-              />
-              {fieldErrors.fechaNacimiento ? (
-                <Text style={styles.fieldErr}>{fieldErrors.fechaNacimiento}</Text>
-              ) : null}
-
-              <Text style={styles.label}>Dirección (opcional)</Text>
-              <TextInput
-                style={[styles.inputNormal, styles.inputMultiline, fieldErrors.direccion && styles.inputError]}
-                value={draft?.direccion ?? ''}
-                onChangeText={(t) => {
-                  setDraft((d) => (d ? { ...d, direccion: t } : d));
-                  setFieldErrors((fe) => ({ ...fe, direccion: undefined }));
-                }}
-                multiline
-                textAlignVertical="top"
-                editable={!saving}
-              />
-              {fieldErrors.direccion ? <Text style={styles.fieldErr}>{fieldErrors.direccion}</Text> : null}
-
-              {saveError ? <Text style={styles.error}>{saveError}</Text> : null}
-            </ScrollView>
-            <View style={styles.modalActions}>
-              <Pressable style={styles.modalCancel} onPress={closeEditModal} disabled={saving}>
-                <Text style={styles.modalCancelText}>Cancelar</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.modalSave, saving && styles.buttonDisabled]}
-                onPress={() => void onSave()}
-                disabled={saving}
+            <View style={styles.modalSheet}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Editar datos personales</Text>
+                <Pressable onPress={closeEditModal} hitSlop={12} accessibilityLabel="Cerrar">
+                  <Ionicons name="close" size={26} color={colors.textMuted} />
+                </Pressable>
+              </View>
+              <Text style={styles.modalHint}>
+                Teléfono RD (809/829/849); la fecha se elige con el calendario.
+              </Text>
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.modalScroll}
               >
-                {saving ? (
-                  <ActivityIndicator color={colors.onPrimary} />
-                ) : (
-                  <Text style={styles.modalSaveText}>Guardar cambios</Text>
-                )}
-              </Pressable>
+                <Text style={styles.label}>Nombre</Text>
+                <TextInput
+                  style={[styles.inputNormal, fieldErrors.nombre && styles.inputError]}
+                  value={draft?.nombre ?? ''}
+                  onChangeText={(t) => {
+                    setDraft((d) => (d ? { ...d, nombre: t } : d));
+                    setFieldErrors((fe) => ({ ...fe, nombre: undefined }));
+                  }}
+                  editable={!saving}
+                  autoCapitalize="words"
+                />
+                {fieldErrors.nombre ? <Text style={styles.fieldErr}>{fieldErrors.nombre}</Text> : null}
+
+                <Text style={styles.label}>Apellidos</Text>
+                <TextInput
+                  style={[styles.inputNormal, fieldErrors.apellidos && styles.inputError]}
+                  value={draft?.apellidos ?? ''}
+                  onChangeText={(t) => {
+                    setDraft((d) => (d ? { ...d, apellidos: t } : d));
+                    setFieldErrors((fe) => ({ ...fe, apellidos: undefined }));
+                  }}
+                  editable={!saving}
+                  autoCapitalize="words"
+                />
+                {fieldErrors.apellidos ? <Text style={styles.fieldErr}>{fieldErrors.apellidos}</Text> : null}
+
+                <Text style={styles.label}>Correo</Text>
+                <TextInput
+                  style={[styles.inputNormal, fieldErrors.correo && styles.inputError]}
+                  value={draft?.correo ?? ''}
+                  onChangeText={(t) => {
+                    setDraft((d) => (d ? { ...d, correo: t } : d));
+                    setFieldErrors((fe) => ({ ...fe, correo: undefined }));
+                  }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!saving}
+                />
+                {fieldErrors.correo ? <Text style={styles.fieldErr}>{fieldErrors.correo}</Text> : null}
+
+                <Text style={styles.label}>Teléfono</Text>
+                <TextInput
+                  style={[styles.inputNormal, fieldErrors.telefono && styles.inputError]}
+                  value={formatPhoneRdDisplay(draft?.telefono ?? '')}
+                  onChangeText={(t) => {
+                    const digits = normalizePhoneRd(t);
+                    setDraft((d) => (d ? { ...d, telefono: digits } : d));
+                    setFieldErrors((fe) => ({ ...fe, telefono: undefined }));
+                  }}
+                  keyboardType="phone-pad"
+                  placeholder="809-123-4567"
+                  placeholderTextColor={colors.textMuted}
+                  editable={!saving}
+                  maxLength={12}
+                />
+                {fieldErrors.telefono ? <Text style={styles.fieldErr}>{fieldErrors.telefono}</Text> : null}
+
+                <Text style={styles.label}>Fecha de nacimiento</Text>
+                <BirthDatePickerField
+                  value={draft?.fechaNacimiento ?? ''}
+                  onChange={(ddMmYyyy) => {
+                    setDraft((d) => (d ? { ...d, fechaNacimiento: ddMmYyyy } : d));
+                    setFieldErrors((fe) => ({ ...fe, fechaNacimiento: undefined }));
+                  }}
+                  hasError={Boolean(fieldErrors.fechaNacimiento)}
+                  disabled={saving}
+                  placeholder="dd-MM-yyyy"
+                />
+                {fieldErrors.fechaNacimiento ? (
+                  <Text style={styles.fieldErr}>{fieldErrors.fechaNacimiento}</Text>
+                ) : null}
+
+                <Text style={styles.label}>Dirección (opcional)</Text>
+                <TextInput
+                  style={[styles.inputNormal, styles.inputMultiline, fieldErrors.direccion && styles.inputError]}
+                  value={draft?.direccion ?? ''}
+                  onChangeText={(t) => {
+                    setDraft((d) => (d ? { ...d, direccion: t } : d));
+                    setFieldErrors((fe) => ({ ...fe, direccion: undefined }));
+                  }}
+                  multiline
+                  textAlignVertical="top"
+                  editable={!saving}
+                />
+                {fieldErrors.direccion ? <Text style={styles.fieldErr}>{fieldErrors.direccion}</Text> : null}
+
+                {saveError ? <Text style={styles.error}>{saveError}</Text> : null}
+              </ScrollView>
+              <View style={styles.modalActions}>
+                <Pressable style={styles.modalCancel} onPress={closeEditModal} disabled={saving}>
+                  <Text style={styles.modalCancelText}>Cancelar</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.modalSave, saving && styles.buttonDisabled]}
+                  onPress={() => void onSave()}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <ActivityIndicator color={colors.onPrimary} />
+                  ) : (
+                    <Text style={styles.modalSaveText}>Guardar cambios</Text>
+                  )}
+                </Pressable>
+              </View>
             </View>
-          </View>
           </KeyboardAvoidingView>
         </View>
       </Modal>
@@ -679,6 +677,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenPadding,
     paddingBottom: spacing.xl,
   },
+  versionText: {
+  fontSize: typography.size.xs,
+  color: colors.textMuted,
+  textAlign: 'center',
+  marginTop: spacing.lg,
+  marginBottom: spacing.md,
+},
   avatarRing: {
     width: 112,
     height: 112,
