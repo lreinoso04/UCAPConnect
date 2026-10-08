@@ -11,7 +11,7 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
+} from '../ui/themedNative';
 import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';

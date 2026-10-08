@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from '../../ui/themedNative';
 import { Trash2, Clock } from 'lucide-react-native';
 import { Colors } from '@/colors';
 import { useCart, CartApiItem } from '@/context/CartContext';

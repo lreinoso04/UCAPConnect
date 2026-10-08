@@ -12,17 +12,16 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
+} from '../ui/themedNative';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { ApiException } from '../api/client';
 import type { AuthStackParamList } from '../navigation/types';
 import { colors, layout, radius, spacing, typography } from '../theme';
+import BrandLogo from '../components/BrandLogo';
 
-const logoSource = require('../../assets/logo-ucap.png');
 const windowH = Dimensions.get('window').height;
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
@@ -81,9 +80,7 @@ export function LoginScreen({ navigation, route }: Props) {
       >
         {!keyboardVisible && (
         <View style={[styles.hero, { paddingTop: insets.top + spacing.lg, minHeight: windowH * 0.35 }]}>
-          <Image source={logoSource} style={styles.logo} contentFit="contain" accessibilityLabel="UCAP" />
-          <Text style={styles.heroTitle}>UCAP Connect</Text>
-          <Text style={styles.heroSubtitle}>Centro de Capacitación Profesional • UAPA</Text>
+          <View style={{ alignSelf: 'center' }}><BrandLogo size="large" tone="dark" /></View>
           <View style={styles.heroAccent} />
         </View>
         )}
@@ -177,23 +174,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: layout.screenPadding,
     paddingBottom: spacing.xl,
-  },
-  logo: {
-    width: 220,
-    height: 88,
-    marginBottom: spacing.md,
-  },
-  heroTitle: {
-    fontSize: typography.size.hero,
-    fontWeight: typography.weight.bold,
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-  heroSubtitle: {
-    marginTop: 4,
-    fontSize: typography.size.xs,
-    color: 'rgba(255,255,255,0.85)',
-    textAlign: 'center',
   },
   heroAccent: {
     position: 'absolute',

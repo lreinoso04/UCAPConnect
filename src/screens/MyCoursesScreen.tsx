@@ -9,7 +9,7 @@ import {
   FlatList,
   Pressable,
   ActivityIndicator,
-} from 'react-native';
+} from '../ui/themedNative';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';

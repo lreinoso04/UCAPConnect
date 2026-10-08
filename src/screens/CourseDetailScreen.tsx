@@ -1,6 +1,6 @@
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View, Alert } from '../ui/themedNative';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image } from 'react-native';
+import { Image } from '../ui/themedNative';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState } from 'react';

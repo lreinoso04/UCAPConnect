@@ -1,5 +1,5 @@
 // Este sera temporar hasta que se le agrege el endpoint
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from '../../ui/themedNative';
 
 export function TypingIndicator() {
   return (

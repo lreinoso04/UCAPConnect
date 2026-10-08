@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, ScrollView } from '../ui/themedNative';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { upcomingEvents } from '../data/dashboardMock';
 import { colors, layout, radius, spacing, typography } from '../theme';

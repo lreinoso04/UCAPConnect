@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from '../ui/themedNative';
 import { Trash2, ArrowRight, GraduationCap } from 'lucide-react-native';
 import { Colors } from '../colors';
 import { useCart } from '../context/CartContext';

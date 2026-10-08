@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, RefreshControl, Dimensions, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, RefreshControl, Dimensions, TextInput } from '../ui/themedNative';
 import { GraduationCap, Search } from 'lucide-react-native';
 import { Course } from '../types/product';
 import { Colors } from '../colors';

@@ -4,7 +4,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-} from 'react-native';
+} from '../../ui/themedNative';
 import { Colors } from '@/colors';
 
 interface CategoryFilterProps {

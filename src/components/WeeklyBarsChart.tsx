@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from '../ui/themedNative';
 import { colors, radius, spacing, typography } from '../theme';
 
 type Props = {

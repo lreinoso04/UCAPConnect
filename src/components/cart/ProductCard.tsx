@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Pressable } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Pressable } from '../../ui/themedNative';
 import { Star, Plus, Check, Clock, Users } from 'lucide-react-native';
 import { Course } from '@/types/product';
 import { Colors } from '@/colors';

@@ -4,10 +4,10 @@ import {
     Text,
     TouchableOpacity,
     StyleSheet,
-    Image,
     Dimensions,
     Animated,
-} from 'react-native';
+} from '../../ui/themedNative';
+import BrandLogo from '../BrandLogo';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IS_SMALL_SCREEN = SCREEN_WIDTH < 375;
@@ -84,11 +84,7 @@ export function ChatBubble({
                 style={styles.contentTouchable}
             >
                 <View style={styles.header}>
-                    <Image
-                        source={require('../../../assets/logo-cap-light.png')}
-                        style={styles.logo}
-                        resizeMode="contain"
-                    />
+                    <BrandLogo size="small" />
                 </View>
 
                 <View style={styles.bodyContent}>
@@ -163,11 +159,6 @@ const styles = StyleSheet.create({
     bodyContent: {
         paddingHorizontal: 18,
         paddingBottom: 0,
-    },
-
-    logo: {
-        width: 180,
-        height: 45,
     },
 
     title: {

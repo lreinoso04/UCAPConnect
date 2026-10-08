@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { StyleProp, ViewStyle } from 'react-native';
+import type { StyleProp, ViewStyle } from '../ui/themedNative';
 import {
   Modal,
   Platform,
@@ -8,7 +8,7 @@ import {
   Text,
   useWindowDimensions,
   View,
-} from 'react-native';
+} from '../ui/themedNative';
 import DateTimePicker, {
   type DateTimePickerEvent,
   DateTimePickerAndroid,

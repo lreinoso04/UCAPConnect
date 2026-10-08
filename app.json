@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "scheme": "ucapconnect",
     "platforms": [
@@ -15,7 +15,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0d47a1"
+      "backgroundColor": "#071A3B"
     },
     "ios": {
       "supportsTablet": true,
@@ -28,15 +28,28 @@
       "package": "edu.uapa.ucapconnect.mejoras",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0d47a1"
+        "backgroundColor": "#071A3B"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
     "plugins": [
       "expo-secure-store",
       "expo-font",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.ucapconnect",
+          "enableGooglePay": true
+        }
+      ],
+      "expo-image",
+      "expo-splash-screen",
+      "expo-status-bar"
     ],
     "owner": "djelia102",
     "extra": {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, ScrollView } from '../ui/themedNative';
 import { ArrowLeft, Star, ShoppingCart, Heart, Share2, Clock, Users, BarChart3 } from 'lucide-react-native';
 import { Course } from '@/types/product';
 import { Colors } from '../colors';

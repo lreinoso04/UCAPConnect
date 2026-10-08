@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from '../ui/themedNative';
 import { Ionicons } from '@expo/vector-icons';
 import * as SplashScreen from 'expo-splash-screen';
 import { useAuth } from '../context/AuthContext';
@@ -26,7 +26,7 @@ import { ChatProvider } from '@/context/ChatContext';
 import { ChatButton } from '@/components/chatbot/ChatButton';
 import { ChatWindow } from '@/components/chatbot/ChatWindow';
 import { CartProvider } from '@/context/CartContext';
-import { Text } from 'react-native';
+import { Text } from '../ui/themedNative';
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 

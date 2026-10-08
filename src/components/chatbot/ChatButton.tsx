@@ -8,7 +8,7 @@ import {
   Animated,
   Dimensions,
   Easing,
-} from 'react-native';
+} from '../../ui/themedNative';
 
 import { ChatBubble } from './ChatBubble';
 

@@ -11,7 +11,7 @@ import {
   Keyboard,
   Animated,
   Dimensions,
-} from 'react-native';
+} from '../../ui/themedNative';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { MessageBubble } from './MessageBubble';

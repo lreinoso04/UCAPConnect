@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
-} from 'react-native';
+} from '../ui/themedNative';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
